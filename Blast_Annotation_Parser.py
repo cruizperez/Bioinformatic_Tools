@@ -17,7 +17,7 @@ from Bio import SeqIO
 import pandas as pd
 
 
-def HitConfidence(GeneID, identity, bitscore, qlen, slen, long):
+def HitConfidence(GeneID, identity, bitscore, long, qlen = 100, slen = 100):
     if long == True:
         if (int(min(qlen,slen))/int(max(qlen,slen))*100 >= 80) and float(bitscore) >= 80 and float(identity) >= 40:
             return(GeneID)
@@ -30,10 +30,10 @@ def Blast_Parser(BlastFile):
     BlastFile = pd.read_csv(BlastFile, sep="\t", header=None)
     if len(BlastFile.columns) > 12:
         print("I am assuming your Blast output has qlen and slen besides the standard output columns")
-        ID_List = (BlastFile.apply(lambda row: HitConfidence(row[0], row[2], row[11], row[12], row[13], True), axis=1)).tolist()
+        ID_List = (BlastFile.apply(lambda row: HitConfidence(row[0], row[2], row[11], True, row[12], row[13]), axis=1)).tolist()
     else:
         print("I am assuming your Blast output has the standard output")
-        ID_List = (BlastFile.apply(lambda row: HitConfidence(row[0], row[2], row[11], row[12], row[13], False), axis=1)).tolist()
+        ID_List = (BlastFile.apply(lambda row: HitConfidence(row[0], row[2], row[11], True), axis=1)).tolist()
     ID_List = [i for i in ID_List if i is not None]
     return(ID_List)
 
