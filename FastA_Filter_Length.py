@@ -2,22 +2,23 @@
 
 """------------------------- 0.0 Import Modules -----------------------------"""
 
-import argparse
+import argparse, sys
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 
 """----------------------------- 1.0 Define Functions -----------------------------"""
 
 def FastA_Filter(FastaFile, Length, Output, max=False):
+    Output_FH = open(Output, "w")
     with open(FastaFile) as Input:
-        with open(Output) as Output:
-            if max = True
-                for title, seq in SimpleFastaParser(Input):
-                    if len(seq) <= int(Length):
-                        Ouput.write(">%s\n%s\n" % (title, seq))
-            else:
-                for title, seq in SimpleFastaParser(Input):
-                    if len(seq) >= int(Length):
-                        Ouput.write(">%s\n%s\n" % (title, seq))
+        if max == True:
+            for title, seq in SimpleFastaParser(Input):
+                if len(seq) <= int(Length):
+                    Output_FH.write(">%s\n%s\n" % (title, seq))
+        else:
+            for title, seq in SimpleFastaParser(Input):
+                if len(seq) >= int(Length):
+                    Output_FH.write(">%s\n%s\n" % (title, seq))
+    Output_FH.close()
 
 
 def main():
