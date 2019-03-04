@@ -3,19 +3,10 @@
 """------------------------- 0.0 Import Modules -----------------------------"""
 
 import sys, argparse, os
-import time
-import pandas as pd
-
-"""------------------ 1.0 Initialize Variables and Inputs -------------------"""
-
-
-
-
-"""----------------------------- 2.0 Open Files -----------------------------"""
-
 from Bio import SeqIO
 import pandas as pd
 
+"""----------------------------- 1.0 Define Functions -----------------------------"""
 
 def HitConfidence(GeneID, identity, bitscore, long, qlen = 100, slen = 100):
     if long == True:
@@ -53,7 +44,7 @@ def FastA_Filter(List, FastaFile, Reverse, Output):
 def main():
     parser = argparse.ArgumentParser(description='''Given a Blast output and a FastA file, determines which sequences had good matches and retrieves
                                                     either those with good matches or those without for further processing'''
-                                    'Global mandatory parameters: [FastA_File] [Blast_File]\n'
+                                    'Global mandatory parameters: [FastA_File] [Blast_File] [Output_File]\n'
                                     'Optional Database Parameters: See ' + sys.argv[0] + ' -h')
     parser.add_argument('-f', '--fasta', dest='Fasta_File', action='store', required=True, help='FastA file to filter')
     parser.add_argument('-b', '--blast', dest='Blast_File', action='store', required=True, help='Blast output of the FastA file search agains a DB')
