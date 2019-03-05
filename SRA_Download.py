@@ -17,8 +17,12 @@ def SRA_Downloader(Sra_ID, Output):
     output = "~/scratch/" + Sra_ID + "/" + Sra_ID
     print(output)
     ssh_key = "/nv/hmicro1/cruizperez3/.aspera/connect/etc/asperaweb_id_dsa.openssh"
+<<<<<<< HEAD
     print(ssh_key)
-    subprocess.call(['ascp', '-i', ssh_key, '-k', '1', '-T', '-l300', url, Output])
+    subprocess.call(['ascp', '-i', ssh_key, '-k', '1', '-T', '-l300m', url, Output])
+=======
+    subprocess.call(['ascp', '-i', ssh_key, '-k', '1', '-T', '-l300m', url, Output])
+>>>>>>> 9340b6c1dad9092afda8b2b603352654038071e0
 
 
 def main():
