@@ -12,7 +12,7 @@ def SRA_Downloader(Sra_ID, Output):
     url = "anonftp@ftp.ncbi.nlm.nih.gov:/sra/sra-instant/reads/ByRun/sra/" + Prefix + "/" + Six_chars + "/" + Sra_ID + "/" + Sra_ID + ".sra"
     output = "~/scratch/" + Sra_ID + "/" + Sra_ID
     ssh_key = "/nv/hmicro1/cruizperez3/.aspera/connect/etc/asperaweb_id_dsa.openssh"
-    subprocess.call(['ascp', '-i', ssh_key, '-k', '1', '-T', '-l300', url, Output])
+    subprocess.call(['ascp', '-i', ssh_key, '-k', '1', '-T', '-l300m', url, Output])
 
 
 def main():
