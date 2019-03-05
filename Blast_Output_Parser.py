@@ -91,7 +91,7 @@ def main():
                                         'Optional Database Parameters: See ' + sys.argv[0] + ' -h')
         parser.add_argument('-b', '--blast', dest='Blast_File', action='store', required=True, help='Blast output of the FastA file search agains a DB')
         parser.add_argument('-o', '--output', dest='Output_File', action='store', required=True, help='Output FastA file with retrieved sequences')
-        parser.add_argument('--id_perc', dest='ID_Perc', action='store', help='Minimum percentage identity for a match to be included. By default 40%')
+        parser.add_argument('--id_perc', dest='ID_Perc', action='store', help='Minimum percentage identity for a match to be included. By default 40')
         parser.add_argument('--bistcore', dest='Bitscore', action='store', help='Minimum bitscore for a match to be included. By default 80')
         parser.add_argument('--evalue', dest='Evalue', action='store', help='Maximum Evalue for a match to be included. By default 0.1')
         parser.add_argument('--aln_percent', dest='Aln_Percent', action='store', help='If you have qlen and slen in your output, the minimum alignment the match must span to be included. By default not included')
