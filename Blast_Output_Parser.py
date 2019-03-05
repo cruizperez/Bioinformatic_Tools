@@ -86,13 +86,12 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
 
 ### ------------------------------- Main function ------------------------------
 def main():
-        parser = argparse.ArgumentParser(description='''Given a Blast output and a FastA file, determines which sequences had good matches and retrieves
-                                                        either those with good matches or those without for further processing'''
-                                        'Global mandatory parameters: [FastA_File] [Blast_File] [Output_File]\n'
+        parser = argparse.ArgumentParser(description='''Filters a Blast output either based on best bitscore (by default) of by both parameters provided and best bitscore'''
+                                        'Global mandatory parameters: [Blast_File] [Output_File]\n'
                                         'Optional Database Parameters: See ' + sys.argv[0] + ' -h')
         parser.add_argument('-b', '--blast', dest='Blast_File', action='store', required=True, help='Blast output of the FastA file search agains a DB')
         parser.add_argument('-o', '--output', dest='Output_File', action='store', required=True, help='Output FastA file with retrieved sequences')
-        parser.add_argument('--id', dest='ID_Perc', action='store', help='Minimum percentage identity for a match to be included. By default 40%')
+        parser.add_argument('--id_perc', dest='ID_Perc', action='store', help='Minimum percentage identity for a match to be included. By default 40%')
         parser.add_argument('--bistcore', dest='Bitscore', action='store', help='Minimum bitscore for a match to be included. By default 80')
         parser.add_argument('--evalue', dest='Evalue', action='store', help='Maximum Evalue for a match to be included. By default 0.1')
         parser.add_argument('--aln_percent', dest='Aln_Percent', action='store', help='If you have qlen and slen in your output, the minimum alignment the match must span to be included. By default not included')
