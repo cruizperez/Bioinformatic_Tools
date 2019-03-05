@@ -7,11 +7,17 @@ import sys, argparse, os, subprocess
 """----------------------------- 1.0 Define Functions -----------------------------"""
 
 def SRA_Downloader(Sra_ID, Output):
-    Prefix = Sra_ID[0:2]
-    Six_chars = Sra_ID[0:5]
+    print(Sra_ID, Output)
+    Prefix = Sra_ID[0:3]
+    print(Prefix)
+    Six_chars = Sra_ID[0:6]
+    print(Six_chars)
     url = "anonftp@ftp.ncbi.nlm.nih.gov:/sra/sra-instant/reads/ByRun/sra/" + Prefix + "/" + Six_chars + "/" + Sra_ID + "/" + Sra_ID + ".sra"
+    print(url)
     output = "~/scratch/" + Sra_ID + "/" + Sra_ID
+    print(output)
     ssh_key = "/nv/hmicro1/cruizperez3/.aspera/connect/etc/asperaweb_id_dsa.openssh"
+    print(ssh_key)
     subprocess.call(['ascp', '-i', ssh_key, '-k', '1', '-T', '-l300', url, Output])
 
 
