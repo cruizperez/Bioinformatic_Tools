@@ -13,9 +13,9 @@ def SRA_Downloader(Sra_ID, Output, SRA_Bin = None):
             print(SRA_ID, " file already found. Attempting to convert to FastQ files")
             if SRA_Bin:
                 sra_toolkit_exec = SRA_Bin + "/fastq-dump"
-                subprocess.call([sra_toolkit_exec, '--split-files', '-I', Output_Dir])
+                subprocess.call([sra_toolkit_exec, '--split-files', '-I', '-O', Output_Dir, Output])
             else:
-                subprocess.call(['fastq-dump', '--split-files', '-I', Output_Dir])
+                subprocess.call(['fastq-dump', '--split-files', '-I', '-O', Output_Dir, Output])
         except:
             print("An error occured during processing... Attempting to download file again.")
             pass
@@ -29,9 +29,9 @@ def SRA_Downloader(Sra_ID, Output, SRA_Bin = None):
         print(Sra_ID, " downloaded. Now converting to FastQ files (Reads 1 and 2 splitted)")
         if SRA_Bin:
             sra_toolkit_exec = SRA_Bin + "/fastq-dump"
-            subprocess.call([sra_toolkit_exec, '--split-files', '-I', Output_Dir])
+            subprocess.call([sra_toolkit_exec, '--split-files', '-I', '-O', Output_Dir, Output])
         else:
-            subprocess.call(['fastq-dump', '--split-files', '-I', Output_Dir])
+            subprocess.call(['fastq-dump', '--split-files', '-I', '-O', Output_Dir, Output])
 
 def main():
     parser = argparse.ArgumentParser(description='''Download a given SRA dataset and converts it into the corresponding
