@@ -10,12 +10,12 @@ import pandas as pd
 ### ------------------------------Match filter--------------------------------------
 def HitConfidence(line, id, bitscore, evalue, Aln_Percent = None):
     if Aln_Percent == None:
-        if int(line[2]) >= int(id) and float(line[11]) >= float(bitscore) and float(line[10]) <= float(evalue):
+        if float(line[2]) >= float(id) and float(line[11]) >= float(bitscore) and float(line[10]) <= float(evalue):
             High_Quality_Match = True
         else:
             High_Quality_Match = False
     else:
-        if (int(min(line[12],line[13]))/int(max(line[12],line[13]))*100 >= Aln_Percent) and float(line[11]) >= float(bitscore) and int(line[2]) >= int(id) and float(line[10]) <= float(evalue):
+        if (int(min(line[12],line[13]))/int(max(line[12],line[13]))*100 >= Aln_Percent) and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id) and float(line[10]) <= float(evalue):
             High_Quality_Match = True
         else:
             High_Quality_Match = False
@@ -26,8 +26,8 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
     Blast_Dict = {}
     print("Reading Blast Output")
     # Check if Blast output has qlen and slen in addition to std output.
-    with open(BlastFile) as BlastFile:
-        if len(BlastFile.readline().strip().split("\t")) == 14:
+    with open(BlastFile) as BlastFile_Input:
+        if len(BlastFile_Input.readline().strip().split("\t")) == 14:
             print("I am assuming your Blast output has qlen and slen besides the standard output columns")
             long = True
         else:
@@ -37,22 +37,25 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
     if all(variable is None for variable in [id, bitscore, evalue, Aln_Percent]):
         print("Only retrieving best match per sequence.")
         # Give only best match based on bitscore.
-        with open(BlastFile) as BlastFile:
-                for line in BlastFile:
+        with open(BlastFile) as BlastFile_Input:
+                for line in BlastFile_Input:
                     line = line.strip().split("\t")
                     if line[0] not in Blast_Dict:
                         Blast_Dict[line[0]] = line[1:-1]
                     else:
                         if float(line[11]) >= float(Blast_Dict[line[0]][10]):
                             Blast_Dict[line[0]] = line[1:-1]
+                        elif float(line[11]) == float(Blast_Dict[line[0]][10]):
+                                if randrange(0, 2) > 0:
+                                    Blast_Dict[line[0]] = line[1:-1]
                         else:
                             pass
     else:
         print("Performing match filtering and retrieving best match based on the parameters you provided.")
         # Do match filtering based on parameters provided and retrieve best match based on best bitscore.
-        with open(BlastFile) as BlastFile:
+        with open(BlastFile) as BlastFile_Input:
             if long == True:
-                for line in BlastFile:
+                for line in BlastFile_Input:
                     line = line.strip().split("\t")
                     Good = HitConfidence(line, id, evalue, bitscore, Aln_Percent)
                     if Good == True:
@@ -61,20 +64,26 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
                         else:
                             if float(line[11]) >= float(Blast_Dict[line[0]][10]):
                                 Blast_Dict[line[0]] = line[1:-1]
+                            elif float(line[11]) == float(Blast_Dict[line[0]][10]):
+                                if randrange(0, 2) > 0:
+                                    Blast_Dict[line[0]] = line[1:-1]
                             else:
                                 pass
                     else:
                         pass
             else:
-                for line in BlastFile:
+                for line in BlastFile_Input:
                     line = line.strip().split("\t")
-                    Good = HitConfidence(line, id, bitscore)
+                    Good = HitConfidence(line, id, evalue, bitscore)
                     if Good == True:
                         if line[0] not in Blast_Dict:
                             Blast_Dict[line[0]] = line[1:-1]
                         else:
                             if float(line[11]) >= float(Blast_Dict[line[0]][10]):
                                 Blast_Dict[line[0]] = line[1:-1]
+                            elif float(line[11]) == float(Blast_Dict[line[0]][10]):
+                                if randrange(0, 2) > 0:
+                                    Blast_Dict[line[0]] = line[1:-1]
                             else:
                                 pass
                     else:
