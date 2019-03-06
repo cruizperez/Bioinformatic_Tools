@@ -24,7 +24,7 @@ def HitConfidence(line, id, bitscore, evalue, Aln_Percent = None):
 ### ----------------------------- Blast Parser ----------------------------------------
 def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
     Blast_Dict = {}
-    print("Reading Blast Output")
+    print("Reading " + BlastFile + " Blast Output")
     # Check if Blast output has qlen and slen in addition to std output.
     with open(BlastFile) as BlastFile_Input:
         if len(BlastFile_Input.readline().strip().split("\t")) == 14:
@@ -35,23 +35,39 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
             long = False
     # Check if any parameter was given for match filtering.
     if all(variable is None for variable in [id, bitscore, evalue, Aln_Percent]):
-        print("Only retrieving best match per sequence.")
+        print("Only retrieving best match per sequence and default values.")
+        if id == None:
+            id = 30
+        if bitscore == None:
+            bitscore = 50
+        if evalue == None:
+            evalue = 10
         # Give only best match based on bitscore.
         with open(BlastFile) as BlastFile_Input:
                 for line in BlastFile_Input:
                     line = line.strip().split("\t")
-                    if line[0] not in Blast_Dict:
-                        Blast_Dict[line[0]] = line[1:]
-                    else:
-                        if float(line[11]) >= float(Blast_Dict[line[0]][10]):
+                    Good = HitConfidence(line, id, evalue, bitscore, Aln_Percent)
+                    if Good == True:
+                        if line[0] not in Blast_Dict:
                             Blast_Dict[line[0]] = line[1:]
-                        elif float(line[11]) == float(Blast_Dict[line[0]][10]):
-                                if randrange(0, 2) > 0:
-                                    Blast_Dict[line[0]] = line[1:]
                         else:
-                            pass
+                            if float(line[11]) >= float(Blast_Dict[line[0]][10]):
+                                Blast_Dict[line[0]] = line[1:]
+                            elif float(line[11]) == float(Blast_Dict[line[0]][10]):
+                                    if randrange(0, 2) > 0:
+                                        Blast_Dict[line[0]] = line[1:]
+                            else:
+                                pass
+                    else:
+                        pass
     else:
-        print("Performing match filtering and retrieving best match based on the parameters you provided.")
+        print("Performing match filtering and retrieving best match based on the parameters you provided (if only some, the others will take their default values).")
+        if id == None:
+            id = 30
+        if bitscore == None:
+            bitscore = 50
+        if evalue == None:
+            evalue = 10
         # Do match filtering based on parameters provided and retrieve best match based on best bitscore.
         with open(BlastFile) as BlastFile_Input:
             if long == True:
@@ -77,8 +93,9 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
                     Good = HitConfidence(line, id, evalue, bitscore)
                     if Good == True:
                         if line[0] not in Blast_Dict:
-                            Blast_Dict[line[0]] = line[1:-1]
+                            Blast_Dict[line[0]] = line[1:]
                         else:
+                            print(line[11], line[0])
                             if float(line[11]) >= float(Blast_Dict[line[0]][10]):
                                 Blast_Dict[line[0]] = line[1:]
                             elif float(line[11]) == float(Blast_Dict[line[0]][10]):
@@ -113,12 +130,6 @@ def main():
         Evalue = args.Evalue
         Aln_Percent = args.Aln_Percent
 
-        if ID_Perc == None:
-            ID_Perc = 40
-        if Bitscore == None:
-            Bitscore = 80
-        if Evalue == None:
-            Evalue = 0.1
 
         Blast_Parser(Blast_File, Output_File, ID_Perc, Bitscore, Evalue, Aln_Percent)
 
