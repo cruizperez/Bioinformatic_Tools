@@ -90,8 +90,8 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
                         pass
 
     # Convert dictionary to dataframe and export
-    Blast_DF = pd.DataFrame.from_dict(Blast_Dict, orient='index', index_col = False)
-    Blast_DF.to_csv(Output, sep='\t')
+    Blast_DF = pd.DataFrame.from_dict(Blast_Dict, orient='index')
+    Blast_DF.to_csv(Output, sep='\t', header= False)
 
 ### ------------------------------- Main function ------------------------------
 def main():
