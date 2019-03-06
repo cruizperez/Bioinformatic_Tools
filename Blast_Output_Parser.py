@@ -41,13 +41,13 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
                 for line in BlastFile_Input:
                     line = line.strip().split("\t")
                     if line[0] not in Blast_Dict:
-                        Blast_Dict[line[0]] = line[1:-1]
+                        Blast_Dict[line[0]] = line[1:]
                     else:
                         if float(line[11]) >= float(Blast_Dict[line[0]][10]):
-                            Blast_Dict[line[0]] = line[1:-1]
+                            Blast_Dict[line[0]] = line[1:]
                         elif float(line[11]) == float(Blast_Dict[line[0]][10]):
                                 if randrange(0, 2) > 0:
-                                    Blast_Dict[line[0]] = line[1:-1]
+                                    Blast_Dict[line[0]] = line[1:]
                         else:
                             pass
     else:
@@ -60,13 +60,13 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
                     Good = HitConfidence(line, id, evalue, bitscore, Aln_Percent)
                     if Good == True:
                         if line[0] not in Blast_Dict:
-                            Blast_Dict[line[0]] = line[1:-1]
+                            Blast_Dict[line[0]] = line[1:]
                         else:
                             if float(line[11]) >= float(Blast_Dict[line[0]][10]):
-                                Blast_Dict[line[0]] = line[1:-1]
+                                Blast_Dict[line[0]] = line[1:]
                             elif float(line[11]) == float(Blast_Dict[line[0]][10]):
                                 if randrange(0, 2) > 0:
-                                    Blast_Dict[line[0]] = line[1:-1]
+                                    Blast_Dict[line[0]] = line[1:]
                             else:
                                 pass
                     else:
@@ -80,10 +80,10 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
                             Blast_Dict[line[0]] = line[1:-1]
                         else:
                             if float(line[11]) >= float(Blast_Dict[line[0]][10]):
-                                Blast_Dict[line[0]] = line[1:-1]
+                                Blast_Dict[line[0]] = line[1:]
                             elif float(line[11]) == float(Blast_Dict[line[0]][10]):
                                 if randrange(0, 2) > 0:
-                                    Blast_Dict[line[0]] = line[1:-1]
+                                    Blast_Dict[line[0]] = line[1:]
                             else:
                                 pass
                     else:
