@@ -14,7 +14,7 @@ def HitConfidence(line, id, bitscore, evalue, Aln_Percent = None):
         else:
             High_Quality_Match = False
     else:
-        if (int(line[3])*100/int(line[12]) >= Aln_Percent) and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id) and float(line[10]) <= float(evalue):
+        if (int(line[3])*100/int(line[12]) >= float(Aln_Percent)) and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id) and float(line[10]) <= float(evalue):
             High_Quality_Match = True
         else:
             High_Quality_Match = False
@@ -34,7 +34,7 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
             long = False
     # Check if any parameter was given for match filtering.
     if all(variable is None for variable in [id, bitscore, evalue, Aln_Percent]):
-        print("Only retrieving best match per sequence and default values.")
+        print("Only retrieving best match per sequence using other default values.")
         if id == None:
             id = 30
         if bitscore == None:
