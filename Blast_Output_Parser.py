@@ -94,7 +94,6 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
                         if line[0] not in Blast_Dict:
                             Blast_Dict[line[0]] = line[1:]
                         else:
-                            print(line[11], line[0])
                             if float(line[11]) >= float(Blast_Dict[line[0]][10]):
                                 Blast_Dict[line[0]] = line[1:]
                             elif float(line[11]) == float(Blast_Dict[line[0]][10]):
