@@ -16,7 +16,7 @@ def FastA_Merger(FastaList, Output_File):
         files = [stack.enter_context(open(fname)) for fname in FastaList]
 
         for seqs1, seqs2 in zip(SimpleFastaParser(files[0]), SimpleFastaParser(files[1])):
-            Output_FH.write(">%s\n%s\n>%s\n%s" % (seqs1[0], seqs1[1], seqs2[0], seqs2[1]))
+            Output_FH.write(">%s\n%s\n>%s\n%s\n" % (seqs1[0], seqs1[1], seqs2[0], seqs2[1]))
 
 ################################################################################
 """---3.0 Main Function---"""
