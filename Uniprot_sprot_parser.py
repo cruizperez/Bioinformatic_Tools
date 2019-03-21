@@ -8,8 +8,7 @@ identification = None
 
 with open("uniprot_trembl.dat") as file:
     for line in file:
-        line = line.strip()
-        line = line.split("   ")
+        line = line.strip().split("   ")
         if len(line) <= 1:
             continue
         elif line[0] == "ID":
