@@ -4,6 +4,7 @@
 
 import sys, argparse, os
 import pandas as pd
+from random import randrange
 
 """----------------------------- 1.0 Define Functions -----------------------------"""
 ### ------------------------------Match filter--------------------------------------
