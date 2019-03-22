@@ -19,7 +19,7 @@ def ANI_Parser(ANI_File, Coverage_File, Output_File, ID):
 
     for i in Genomes:
         for j in Genomes:
-            if Coverage_DF.loc[i, j] >= 0.2 or Coverage_DF.loc[j, i] >= 0.2 and Identity_DF.loc[i, j] >= ID:
+            if (Coverage_DF.loc[i, j] >= 0.2 or Coverage_DF.loc[j, i] >= 0.2) and Identity_DF.loc[i, j] >= ID:
                 Output_FH.write("%s\t%s\t%s\n" % (i, j, Identity_DF.loc[i, j]))
 
     Output_FH.close()
@@ -28,7 +28,7 @@ def ANI_Parser(ANI_File, Coverage_File, Output_File, ID):
 """---3.0 Main Function---"""
 
 def main():
-    parser = argparse.ArgumentParser(description='''Parses pyANI output returning ANI values that were calculated over more than 20%% of the sequence, if no ID value is provided the default is 95%%'''
+    parser = argparse.ArgumentParser(description='''Parses pyANI output returning ANI values that were calculated over more than 20% of the sequence, if no ID value is provided the default is 95%\n'''
                                     'Global mandatory parameters: [ANI_Matrix] [ANI_Aln_Percent_Matrix] [Output_File]\n'
                                     'Optional Database Parameters: See ' + sys.argv[0] + ' -h')
     parser.add_argument('-a', '--ani', dest='ANI_File', action='store', required=True, help='Matrix with ANI values')
@@ -41,6 +41,7 @@ def main():
     Coverage_File = args.Coverage_File
     Output_File = args.Output_File
     ID = args.ID
+    print(ID)
 
     ANI_Parser(ANI_File, Coverage_File, Output_File, ID)
 
