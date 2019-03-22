@@ -42,7 +42,7 @@ def main():
     Output_File = args.Output_File
     ID = args.ID
 
-    ANI_Parser(ANI_File, Coverage_File, Output_File, ID):
+    ANI_Parser(ANI_File, Coverage_File, Output_File, ID)
 
 if __name__ == "__main__":
     main()
