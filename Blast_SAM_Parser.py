@@ -15,11 +15,13 @@ and removing the duplications in the reference IDs
 ################################################################################
 """---1.0 Import Modules---"""
 from random import randrange
+import argparse, sys
 
 ################################################################################
 """---2.0 Define Functions---"""
 
 def Blast_SAM_Parser(SAM_File, Output_File):
+    Output_FH = open(Output_File, "w")
     with open(SAM_File, "r") as SAM_FH:
         Ref_ID = []
         Read_ID = {}
@@ -30,12 +32,12 @@ def Blast_SAM_Parser(SAM_File, Output_File):
                 Ref = Ref.split("|")[1]
                 if Ref not in Ref_ID:
                     Ref_ID.append(Ref)
-                    SAM_FH.write(line)
+                    Output_FH.write(line + "\n")
                 else:
                     pass
             elif line.startswith('@'):
                 pass
-                SAM_FH.write(line)
+                Output_FH.write(line + "\n")
             else:
                 Read = line.split()[0]
                 Bitscore = float(line.split("BS:f:")[1])
@@ -53,7 +55,7 @@ def Blast_SAM_Parser(SAM_File, Output_File):
                         pass
 
         for key in Read_ID:
-            SAM_FH.write(Read_ID[key][1])
+            Output_FH.write(Read_ID[key][1] + "\n")
 
 
 ################################################################################
@@ -68,10 +70,10 @@ def main():
     parser.add_argument('-o', '--output', dest='Output_File', action='store', required=True, help='Output SAM file best hits')
     args = parser.parse_args()
 
-    Fasta_File = args.SAM_File
+    SAM_File = args.SAM_File
     Output_File = args.Output_File
 
-    Blast_SAM_Parser(SAM_File, Output_File):
+    Blast_SAM_Parser(SAM_File, Output_File)
 
 if __name__ == "__main__":
     main()
