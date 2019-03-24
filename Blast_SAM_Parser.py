@@ -37,7 +37,7 @@ def Blast_SAM_Parser(SAM_File, Output_File):
                 else:
                     pass
             elif line.startswith('@'):
-                if Header_Count != 0
+                if Header_Count != 0:
                     Output_FH.write(line + "\n")
                     Header_Count += 1
                 else:
