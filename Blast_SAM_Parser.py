@@ -23,6 +23,7 @@ import argparse, sys
 def Blast_SAM_Parser(SAM_File, Output_File):
     Output_FH = open(Output_File, "w")
     with open(SAM_File, "r") as SAM_FH:
+        Header_Count = 0
         Ref_ID = []
         Read_ID = {}
         for line in SAM_FH:
@@ -36,8 +37,11 @@ def Blast_SAM_Parser(SAM_File, Output_File):
                 else:
                     pass
             elif line.startswith('@'):
-                pass
-                Output_FH.write(line + "\n")
+                if Header_Count != 0
+                    Output_FH.write(line + "\n")
+                    Header_Count += 1
+                else:
+                    pass
             else:
                 Read = line.split()[0]
                 Bitscore = float(line.split("BS:f:")[1])
