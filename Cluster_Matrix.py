@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib
+import argparse, sys
 # Change default font used by matplotlib so it can be modified
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
@@ -35,6 +36,8 @@ def Matrix_Clustering(Input_file, Output_Prefix):
     Index = Matrix.index[Matrix_index]
     Cols = Matrix.index[Matrix_cols]
     Reordered_Matrix = pd.DataFrame(Matrix, Index, columns=Cols)
+
+    return Reordered_Matrix
 
 ################################################################################
 """---3.0 Main Function---"""
