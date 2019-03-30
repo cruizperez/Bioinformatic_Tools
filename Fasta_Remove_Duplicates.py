@@ -23,13 +23,15 @@ from Bio.SeqIO.FastaIO import SimpleFastaParser
 
 def FastA_Remove_Duplicate(Fasta_File, Output_File):
     Sequences = {}
+    Output = open(Output_File, 'w')
     with open(Fasta_File) as Input:
         for title, seq in SimpleFastaParser(Input):
             if title in Sequences:
                 pass
             else:
                 Sequences[title] = seq
-                Output_File.write(">%s\n%s\n" % (title, seq))
+                Output.write(">%s\n%s\n" % (title, seq))
+    Output.close()
 
 ################################################################################
 """---3.0 Main Function---"""
