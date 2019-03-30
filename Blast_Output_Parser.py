@@ -46,7 +46,7 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
         with open(BlastFile) as BlastFile_Input:
                 for line in BlastFile_Input:
                     line = line.strip().split("\t")
-                    Good = HitConfidence(line, id, evalue, bitscore, Aln_Percent)
+                    Good = HitConfidence(line, id, bitscore, evalue, Aln_Percent)
                     if Good == True:
                         if line[0] not in Blast_Dict:
                             Blast_Dict[line[0]] = line[1:]
@@ -73,7 +73,7 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
             if long == True:
                 for line in BlastFile_Input:
                     line = line.strip().split("\t")
-                    Good = HitConfidence(line, id, evalue, bitscore, Aln_Percent)
+                    Good = HitConfidence(line, id, bitscore, evalue, Aln_Percent)
                     if Good == True:
                         if line[0] not in Blast_Dict:
                             Blast_Dict[line[0]] = line[1:]
@@ -90,7 +90,7 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
             else:
                 for line in BlastFile_Input:
                     line = line.strip().split("\t")
-                    Good = HitConfidence(line, id, evalue, bitscore)
+                    Good = HitConfidence(line, id, bitscore, evalue)
                     if Good == True:
                         if line[0] not in Blast_Dict:
                             Blast_Dict[line[0]] = line[1:]
