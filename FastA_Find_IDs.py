@@ -21,7 +21,7 @@ def FastA_Filter_List(List, FastaFile, Output):
                 Output_List.write("%s\tYes\n" % (line[0]))
             else:
                 Output_List.write("%s\tNo\n" % (line[0]))
-    Output_File.close()
+    Output_List.close()
 
 
 ### ------------------------------- Main function ------------------------------
