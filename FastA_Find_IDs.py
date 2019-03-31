@@ -16,7 +16,7 @@ def FastA_Filter_List(List, FastaFile, Output):
     Output_List = open(Output, 'w')
     with open(List) as Seq_IDs:
         for line in Seq_IDs:
-            line = line.strip()
+            line = line.strip().split()
             if line[0] in Seq_ID_list:
                 Output_List.write("%s\tYes\n" % (line[0]))
             else:
