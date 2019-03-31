@@ -11,7 +11,7 @@ from Bio.SeqIO.FastaIO import SimpleFastaParser
 def FastA_Filter_List(List, FastaFile, Output):
     Seq_ID_list = []
     with open(FastaFile) as Fasta_Input:
-        for title in SimpleFastaParser(Fasta_Input):
+        for title, seq in SimpleFastaParser(Fasta_Input):
             Seq_ID_list.append(title.split()[0])
     Output_List = open(Output, 'w')
     with open(List) as Seq_IDs:
