@@ -135,7 +135,7 @@ def main():
         Bitscore = args.Bitscore
         Evalue = args.Evalue
         Aln_Percent = args.Aln_Percent
-        Shorter = args.Shorter
+        Shorter = args.shorter
 
 
         Blast_Parser(Blast_File, Output_File, ID_Perc, Bitscore, Evalue, Aln_Percent, Shorter)
