@@ -2,8 +2,7 @@
 
 """------------------------- 0.0 Import Modules -----------------------------"""
 
-import sys, argparse, os
-import pandas as pd
+import sys, argparse
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 
 """----------------------------- 1.0 Define Functions -----------------------------"""
@@ -25,11 +24,12 @@ def FastA_Filter_List(List, FastaFile, Reverse, Output):
                     Fasta_out.write(">%s\n%s\n" % (title, seq))
         else:
             print("Retrieving " + str(Records) + " records from input")
-            for name in Seq_ID_list:
-                for title, seq in SimpleFastaParser(Fasta_in):
-                    if title.split()[0] == name:
-                        Fasta_out.write(">%s\n%s\n" % (title, seq))
-                        break
+            for title, seq in SimpleFastaParser(Fasta_in):
+                if len(Seq_ID_list) < 1:
+                    break
+                elif title.split()[0] in == Seq_ID_list:
+                    Fasta_out.write(">%s\n%s\n" % (title, seq))
+                    Seq_ID_list.remove(title.split()[0])
     Fasta_out.close()
 
 
