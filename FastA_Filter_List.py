@@ -25,9 +25,11 @@ def FastA_Filter_List(List, FastaFile, Reverse, Output):
                     Fasta_out.write(">%s\n%s\n" % (title, seq))
         else:
             print("Retrieving " + str(Records) + " records from input")
-            for title, seq in SimpleFastaParser(Fasta_in):
-                if title.split()[0] in Seq_ID_list:
-                    Fasta_out.write(">%s\n%s\n" % (title, seq))
+            for name in Seq_IDs:
+                for title, seq in SimpleFastaParser(Fasta_in):
+                    if title.split()[0] == name:
+                        Fasta_out.write(">%s\n%s\n" % (title, seq))
+                        break
     Fasta_out.close()
 
 
