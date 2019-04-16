@@ -8,21 +8,27 @@ from random import randrange
 
 """----------------------------- 1.0 Define Functions -----------------------------"""
 ### ------------------------------Match filter--------------------------------------
-def HitConfidence(line, id, bitscore, evalue, Aln_Percent = None):
+def HitConfidence(line, id, bitscore, evalue, Aln_Percent = None, Shorter = None):
     if Aln_Percent == None:
         if float(line[2]) >= float(id) and float(line[11]) >= float(bitscore) and float(line[10]) <= float(evalue):
             High_Quality_Match = True
         else:
             High_Quality_Match = False
     else:
-        if (int(line[3])*100/int(max(line[13],line[12])) >= float(Aln_Percent)) and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id) and float(line[10]) <= float(evalue):
-            High_Quality_Match = True
+        if Shorter == True:
+            if (int(line[3])*100/int(min(line[13],line[12])) >= float(Aln_Percent)) and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id) and float(line[10]) <= float(evalue):
+                High_Quality_Match = True
+            else:
+                High_Quality_Match = False
         else:
-            High_Quality_Match = False
+            if (int(line[3])*100/int(max(line[13],line[12])) >= float(Aln_Percent)) and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id) and float(line[10]) <= float(evalue):
+                High_Quality_Match = True
+            else:
+                High_Quality_Match = False
     return(High_Quality_Match)
 
 ### ----------------------------- Blast Parser ----------------------------------------
-def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
+def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None, Shorter = None):
     Blast_Dict = {}
     print("Reading " + BlastFile + " Blast Output")
     # Check if Blast output has qlen and slen in addition to std output.
@@ -46,7 +52,7 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
         with open(BlastFile) as BlastFile_Input:
                 for line in BlastFile_Input:
                     line = line.strip().split("\t")
-                    Good = HitConfidence(line, id, bitscore, evalue, Aln_Percent)
+                    Good = HitConfidence(line, id, bitscore, evalue, Aln_Percent, Shorter)
                     if Good == True:
                         if line[0] not in Blast_Dict:
                             Blast_Dict[line[0]] = line[1:]
@@ -73,7 +79,7 @@ def Blast_Parser(BlastFile, Output, id, bitscore, evalue, Aln_Percent = None):
             if long == True:
                 for line in BlastFile_Input:
                     line = line.strip().split("\t")
-                    Good = HitConfidence(line, id, bitscore, evalue, Aln_Percent)
+                    Good = HitConfidence(line, id, bitscore, evalue, Aln_Percent, Shorter)
                     if Good == True:
                         if line[0] not in Blast_Dict:
                             Blast_Dict[line[0]] = line[1:]
@@ -120,6 +126,7 @@ def main():
         parser.add_argument('--bistcore', dest='Bitscore', action='store', help='Minimum bitscore for a match to be included. By default 50')
         parser.add_argument('--evalue', dest='Evalue', action='store', help='Maximum Evalue for a match to be included. By default 10')
         parser.add_argument('--aln_percent', dest='Aln_Percent', action='store', help='If you have qlen and slen in your output, the minimum alignment the match must span to be included. By default not included')
+        parser.add_argument('--shorter', action='store_true', help='Calculates the alignment percentage on the shorter sequence, by default false, i.e. calculated on the longer')
         args = parser.parse_args()
 
         Blast_File = args.Blast_File
@@ -128,9 +135,10 @@ def main():
         Bitscore = args.Bitscore
         Evalue = args.Evalue
         Aln_Percent = args.Aln_Percent
+        Shorter = args.Shorter
 
 
-        Blast_Parser(Blast_File, Output_File, ID_Perc, Bitscore, Evalue, Aln_Percent)
+        Blast_Parser(Blast_File, Output_File, ID_Perc, Bitscore, Evalue, Aln_Percent, Shorter)
 
 if __name__ == "__main__":
     main()
