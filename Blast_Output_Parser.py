@@ -16,12 +16,12 @@ def HitConfidence(line, id, bitscore, evalue, Aln_Percent = None, Shorter = None
             High_Quality_Match = False
     else:
         if Shorter == True:
-            if (int(line[3])*100/int(min(line[13],line[12])) >= float(Aln_Percent)) and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id) and float(line[10]) <= float(evalue):
+            if (int(line[3])*100/min(int(line[13]),int(line[12])) >= float(Aln_Percent)) and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id) and float(line[10]) <= float(evalue):
                 High_Quality_Match = True
             else:
                 High_Quality_Match = False
         else:
-            if (int(line[3])*100/int(max(line[13],line[12])) >= float(Aln_Percent)) and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id) and float(line[10]) <= float(evalue):
+            if (int(line[3])*100/max(int(line[13]),int(line[12])) >= float(Aln_Percent)) and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id) and float(line[10]) <= float(evalue):
                 High_Quality_Match = True
             else:
                 High_Quality_Match = False
@@ -136,6 +136,7 @@ def main():
         Evalue = args.Evalue
         Aln_Percent = args.Aln_Percent
         Shorter = args.shorter
+        print(Shorter)
 
 
         Blast_Parser(Blast_File, Output_File, ID_Perc, Bitscore, Evalue, Aln_Percent, Shorter)
