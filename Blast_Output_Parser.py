@@ -21,12 +21,12 @@ def HitConfidence(line, id, bitscore, evalue, Aln_Percent = None, Shorter = None
             else:
                 High_Quality_Match = False
         elif Query == True:
-            if (int(line[3])*100/int(line[12])) >= float(Aln_Percent)) and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id) and float(line[10]) <= float(evalue):
+            if (int(line[3])*100/int(line[12])) >= float(Aln_Percent) and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id) and float(line[10]) <= float(evalue):
                 High_Quality_Match = True
             else:
                 High_Quality_Match = False
         elif Subject == True:
-            if (int(line[3])*100/int(line[13])) >= float(Aln_Percent)) and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id) and float(line[10]) <= float(evalue):
+            if (int(line[3])*100/int(line[13])) >= float(Aln_Percent) and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id) and float(line[10]) <= float(evalue):
                 High_Quality_Match = True
             else:
                 High_Quality_Match = False
