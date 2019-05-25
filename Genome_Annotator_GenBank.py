@@ -87,6 +87,7 @@ def main():
         Annotation_Col = int(Annotation_Col) - 1
 
     # Run GFF and FastA parser. It creates a temporal GenBank file for the next stepos to read... could be improved.
+    print("Processing {}".format(Input_Genome))
     GFF_Fasta_Merger(Input_Genome, GFF_File)
 
     # Read the tempral GenBank file to include the protein translations
