@@ -16,7 +16,7 @@ def Blast_2_Matrix(Files_List, Num_Ext):
     Read_Matrix = pd.DataFrame()
 
     for File in Files_List:
-        print("Processing {}...").format(File)
+        print("Processing {}...".format(File))
         Filename = pathlib.Path(File)
         # Remove as many extensions as indicated.
         for num in range(1,Num_Ext+1):
