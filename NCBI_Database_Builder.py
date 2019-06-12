@@ -37,24 +37,31 @@ NR_Database_Annotation = mysql.connector.connect(
 # Create cursor to execute commands into the database
 my_cursor = NR_Database_Annotation.cursor(buffered=True)
 
-## If database not created uncomment and create it.
-#my_cursor.execute("CREATE DATABASE ncbi_refseq")
-#my_cursor.execute("SHOW DATABASES")
-#my_cursor.execute("""CREATE TABLE Annotation(
-#                    ID VARCHAR(255) PRIMARY KEY,
-#                    Product VARCHAR(255),
-#                    Taxonomy TEXT,
-#                    Note TEXT)""")
+def Table_Creator(Input_Genbank):
+    for File in Input_Genbank:
+        Base = os.path.basename(File)
+        TableName = os.path.splitext(Base)[0]
+        TableName = TableName.replace('.', '_')
+        #print(TableName)
+    #If table not created uncomment and create it.
+    #my_cursor.execute("CREATE DATABASE ncbi_refseq")
+    #my_cursor.execute("SHOW DATABASES")
+    command = "CREATE TABLE " + TableName + "(ID VARCHAR(255) PRIMARY KEY, Product VARCHAR(255), Taxonomy TEXT, Note TEXT)"
+    #print(command)
+    my_cursor.execute(command)
 
 
 def Database_Filler(Input_Genbank):
     for File in Input_Genbank:
+        Base = os.path.basename(File)
+        TableName = os.path.splitext(Base)[0]
+        TableName = TableName.replace('.', '_')
         print(File)
-        print("----------------------------vim ")
+        print("----------------------------")
         GBFile = SeqIO.parse(File, "genbank")
         for record in GBFile:
             ID = record.id
-            print(ID)
+            #print(ID)
             if 'comment' not in record.annotations:
                 Note == ""
                 #print(Note)
@@ -111,8 +118,7 @@ def Database_Filler(Input_Genbank):
                         Product = feature.qualifiers['product'][0]
                         #print(Product)
 
-            Insert_mySQL = """INSERT INTO Annotation (ID, Product, Taxonomy, Note)
-                                                    VALUES (%s, %s, %s, %s)"""
+            Insert_mySQL = "INSERT INTO " + TableName + "(ID, Product, Taxonomy, Note) VALUES (%s, %s, %s, %s)"
             #print(Product, taxonomy, Note)
             Prot_Record = (ID, Product, taxonomy, Note)
             try:
@@ -136,7 +142,9 @@ def main():
     GenbankFiles = args.GenbankFiles
     #Output_File = args.Output_File
 
+    Table_Creator(GenbankFiles)
     Database_Filler(GenbankFiles)
+
 
 if __name__ == "__main__":
     main()
