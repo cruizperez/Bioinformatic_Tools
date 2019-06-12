@@ -40,7 +40,7 @@ def Database_Search(Input_ID_Table):
             Prot_Record = (line.split("\t")[1])
             print(Prot_Record)
             try:
-                my_cursor.execute("""SELECT * FROM ncbi_refseq.merged WHERE MATCH(ID2) AGAINST('%s' IN NATURAL LANGUAGE MODE);""", (Prot_Record,)
+                my_cursor.execute("""SELECT * FROM ncbi_refseq.merged WHERE MATCH(ID2) AGAINST('%s' IN NATURAL LANGUAGE MODE);""", (Prot_Record,))
             except:
                 print("ID not found in DB")
 
