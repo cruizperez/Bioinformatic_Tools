@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 """------------------------- 0.0 Import Modules -----------------------------"""
-
-import sys, argparse
+from sys import argv
+import argparse
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 
 """----------------------------- 1.0 Define Functions -----------------------------"""
@@ -36,7 +36,7 @@ def FastA_Filter_List(List, FastaFile, Reverse, Output):
 def main():
     parser = argparse.ArgumentParser(description='''Filter a FastA file based ona provided list of IDs. It can exclude or retrieve the sequences using the --reverse flag'''
                                     'Global mandatory parameters: [FastA_File] [Output_File] [ID List File]\n'
-                                    'Optional Database Parameters: See ' + sys.argv[0] + ' -h')
+                                    'Optional Database Parameters: See ' + argv[0] + ' -h')
     parser.add_argument('-f', '--fasta', dest='Fasta_File', action='store', required=True, help='FastA file to filter')
     parser.add_argument('-o', '--output', dest='Output_File', action='store', required=True, help='Output FastA file with retrieved sequences')
     parser.add_argument('-l', '--list', dest='ID_List', action='store', required=True, help='List of IDs to filter')
