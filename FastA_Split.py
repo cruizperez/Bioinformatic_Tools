@@ -21,7 +21,14 @@ from Bio.SeqIO.FastaIO import SimpleFastaParser
 ################################################################################
 """---2.0 Define Functions---"""
 
-def FastA_Splitter(Fasta_File, Output_List):
+def FastA_Splitter_Few(Fasta_File, Output_List):
+    Num_Seqs = 0
+    with open(Fasta_File) as Input:
+        for line in Input:
+            if line.startswith(">"):
+                Num_Seqs += 1
+    if Num_Seqs < len(Output_List):
+        Output_List = Output_List[0:Num_Seqs]
     with ExitStack() as stack:
         files = [stack.enter_context(open(fname, 'w')) for fname in Output_List]
         Counter = len(files)
@@ -34,6 +41,36 @@ def FastA_Splitter(Fasta_File, Output_List):
                 else:
                     File_num += 1
                     files[File_num-1].write(">%s\n%s\n" % (title, seq))
+
+def FastA_Splitter_Several(Fasta_File, Output_List):
+    Num_Seqs = 0
+    with open(Fasta_File) as Input:
+        for line in Input:
+            if line.startswith(">"):
+                Num_Seqs += 1
+    if Num_Seqs < len(Output_List):
+        Output_List = Output_List[0:Num_Seqs]
+    if (Num_Seqs - int(Num_Seqs/len(Output_List)) * len(Output_List)) != 0:
+        Seqs_per_File = int(Num_Seqs/len(Output_List)) + 1
+    else:
+        Seqs_per_File = int(Num_Seqs/len(Output_List))
+
+    with open(Fasta_File) as Input:
+        Index = 0
+        Count = 0
+        for title, seq in SimpleFastaParser(Input):
+            if Count < (Seqs_per_File):
+                CurrentFile = open(Output_List[Index], 'w+')
+                CurrentFile.write(">%s\n%s\n" % (title, seq))
+                CurrentFile.close()
+                Count += 1
+            else:
+                Index += 1
+                CurrentFile = open(Output_List[Index], 'w+')
+                CurrentFile.write(">%s\n%s\n" % (title, seq))
+                CurrentFile.close()
+                Count = 1
+
 
 ################################################################################
 """---3.0 Main Function---"""
@@ -56,7 +93,10 @@ def main():
         Prefix = "Fasta_File_"
     # Run split Function
     Output_list = [Prefix + str(i) + ".fa" for i in range(1, Number+1)]
-    FastA_Splitter(Fasta_Files, Output_list)
+    if Number <= 1000:
+        FastA_Splitter_Few(Fasta_Files, Output_list)
+    else:
+        FastA_Splitter_Several(Fasta_Files, Output_list)
 
 if __name__ == "__main__":
     main()
