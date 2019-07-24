@@ -23,7 +23,7 @@ import pandas as pd
 
 def Parse_Uniprot(Uniprot_Dat):
     Uniprot_Dictionary = defaultdict(list)
-    with open("Test.dat") as Uniprot:
+    with open(Uniprot_Dat) as Uniprot:
         for line in Uniprot:
             if line.startswith("ID"):
                 ID = line.split()[1]
