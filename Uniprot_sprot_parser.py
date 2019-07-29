@@ -4,11 +4,16 @@
 ########################################################################
 # Author:	   Carlos Ruiz
 # Institution:   Georgia Institute of Technology
-# Version:	  1.0
-# Date:		 24 July 2019
+# Version:	  1.1
+# Date:		 29 July 2019
 
 # Description: This script parses a Uniprot.dat file and outputs a table with
 # the ID, Accession, Gene Name, Organism, Taxonomy, KEGG ID, Function, Compartment, and Process.
+# To use in a faster way use gnu parallel as follows:
+# cat InputFile.dat | parallel --jobs [#] --pipe --recend '//' cat \> File_{#}\;
+# /mnt/c/Users/Cruiz/Documents/GitHub/Misc_Tools/Uniprot_sprot_parser.py -i File_{#} -o Test.parsed\; rm File_{#}\;
+# This will split the file into records, execute the script and remove the splitted file. Remember to give it a
+# single output so everything will be in the same file.
 ########################################################################
 """
 
@@ -56,7 +61,8 @@ def main():
     import argparse, sys
     # Setup parser for arguments.
     parser = argparse.ArgumentParser(description='''This script parses a Uniprot.dat file and outputs a table with\n'''
-                                                    '''the ID, Accession, Gene Name, Organism, Taxonomy, KEGG ID, Function, Compartment, and Process.\n'''
+                                                    '''the ID, Accession, Gene Name, Organism, Taxonomy, KEGG ID, Function, Compartment, and Process.\n
+                                                    For faster usage in alrge files use gnu parallel (read script file to see how)\n'''
                                     '''\nGlobal mandatory parameters: [Input Uniprot.dat File]\n'''
                                     '''\nOptional Database Parameters: See ''' + sys.argv[0] + ' -h')
     parser.add_argument('-i', '--input', dest='Uniprot_File', action='store', required=True, help='Uniprot.dat file to parse')
@@ -66,12 +72,18 @@ def main():
     Uniprot_File = args.Uniprot_File
     Output_File = args.Output_File
 
+    # Create empty dataframe with colnames.
+    #with open(Output_File, 'w') as OutFile:
+    #    OutFile.write("ID\tAccesion\tGene\tOrganism\tTaxonomy\tKEGG\tFunction\tCompartment\tProcess\n")
+    # Get dictionary and convert to df
     Dictionary = Parse_Uniprot(Uniprot_File)
     Uniprot_DF = pd.DataFrame.from_dict(Dictionary,orient='index', dtype="str")
-    Uniprot_DF.columns = ["Accesion", "Gene", "Organism", "Taxonomy", "KEGG", "Function", "Compartment", "Process"]
+    #Uniprot_DF.columns = ["Accesion", "Gene", "Organism", "Taxonomy", "KEGG", "Function", "Compartment", "Process"]
     for column in Uniprot_DF:
         Uniprot_DF[column] = Uniprot_DF[column].str[0]
-        Uniprot_DF.to_csv(Output_File, sep="\t")
+    #    Uniprot_DF.to_csv(Output_File, sep="\t")
+    with open(Output_File, 'a') as OutFile:
+        Uniprot_DF.to_csv(OutFile, header=False, sep="\t")
 
 if __name__ == "__main__":
     main()
