@@ -64,7 +64,7 @@ def Parse_Uniprot(Uniprot_Dat, Output):
                 elif "; P:" in line:
                     Process = ''.join([Process, line.split("GO;")[1].strip(), " -- "])
             elif "//\n" in line:
-                SALIDA.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(ID, Accession, Name, Organism, Taxonomy, Function, Compartment, Process))
+                Output.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(ID, Accession, Name, Organism, Taxonomy, Function, Compartment, Process))
                 ID = ""
                 Accession = ""
                 Name = ""
