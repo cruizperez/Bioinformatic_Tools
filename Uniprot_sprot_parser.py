@@ -97,11 +97,7 @@ def main():
     Output_File = args.Output_File
     Headers = args.Headers
 
-    # Create empty dataframe with colnames.
-    #with open(Output_File, 'w') as OutFile:
-    #    OutFile.write("ID\tAccesion\tGene\tOrganism\tTaxonomy\tKEGG\tFunction\tCompartment\tProcess\n")
-    # Get dictionary and convert to df
-    Dictionary = Parse_Uniprot(Uniprot_File, Output_File)
+    Parse_Uniprot(Uniprot_File, Output_File, Headers)
 
 if __name__ == "__main__":
     main()
