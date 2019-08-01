@@ -26,33 +26,55 @@ import pandas as pd
 ################################################################################
 """---2.0 Define Functions---"""
 
-def Parse_Uniprot(Uniprot_Dat):
+def Parse_Uniprot(Uniprot_Dat, Output):
     Uniprot_Dictionary = defaultdict(list)
+    Output = open("Output.txt", 'w')
+    Output.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format("ID", "Accession", "Gene_Name", "Organism", "Taxonomy", "Function", "Compartment", "Process"))
     with open(Uniprot_Dat) as Uniprot:
+        ID = ""
+        Accession = ""
+        Name = ""
+        Organism = ""
+        Taxonomy = ""
+        Function = ""
+        Compartment = ""
+        Process = ""
         for line in Uniprot:
-            if line.startswith("ID"):
+            if "ID  " in line:
                 ID = line.split()[1]
                 Uniprot_Dictionary[ID] = [[] for k in range(8)]
-            elif line.startswith("AC"):
+            elif "AC  " in line:
+                Accession = line.split()[1]
                 Uniprot_Dictionary[ID][0].append(line.split()[1].replace(";", ""))
             elif "RecName" in line:
-                Name = line.split("Full=")[1].replace(";", "")
+                Name = line.split("Full=")[1]
                 Name = Name.split("{")[0].strip()
-                Uniprot_Dictionary[ID][1].append(Name)
-            elif line.startswith("OS"):
-                Uniprot_Dictionary[ID][2].append(line.split("OS")[1].strip())
-            elif line.startswith("OC"):
-                Uniprot_Dictionary[ID][3].append(line.split("OC")[1].strip())
-            elif line.startswith("DR"):
+                #Uniprot_Dictionary[ID][1].append(Name)
+            elif "OS  " in line:
+                Organism = ' '.join([Organism, line.split("OS")[1].strip()])
+            elif "OC  " in line:
+                Taxonomy = ' '.join([Taxonomy, line.split("OC")[1].strip()])
+            elif "DR  " in line:
                 if "KO;" in line:
-                    Uniprot_Dictionary[ID][4].append(line.split()[2].replace(";", ""))
-                elif "F:" in line:
-                    Uniprot_Dictionary[ID][5].append(line.split("F:")[1].split(";")[0])
-                elif "C:" in line:
-                    Uniprot_Dictionary[ID][6].append(line.split("C:")[1].split(";")[0])
-                elif "P:" in line:
-                    Uniprot_Dictionary[ID][7].append(line.split("P:")[1].split(";")[0])
-    return Uniprot_Dictionary
+                    KO = line.split()[2]
+                elif "; F:" in line:
+                    Function = ''.join([Function, line.split("GO;")[1].strip(), " -- "])
+                elif "; C:" in line:
+                    Compartment = ''.join([Compartment, line.split("GO;")[1].strip(), " -- "])
+                elif "; P:" in line:
+                    Process = ''.join([Process, line.split("GO;")[1].strip(), " -- "])
+            elif "//\n" in line:
+                SALIDA.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(ID, Accession, Name, Organism, Taxonomy, Function, Compartment, Process))
+                ID = ""
+                Accession = ""
+                Name = ""
+                Organism = ""
+                Taxonomy = ""
+                Function = ""
+                Compartment = ""
+                Process = ""
+
+    Output.close()
 
 ################################################################################
 """---3.0 Main Function---"""
@@ -76,14 +98,7 @@ def main():
     #with open(Output_File, 'w') as OutFile:
     #    OutFile.write("ID\tAccesion\tGene\tOrganism\tTaxonomy\tKEGG\tFunction\tCompartment\tProcess\n")
     # Get dictionary and convert to df
-    Dictionary = Parse_Uniprot(Uniprot_File)
-    Uniprot_DF = pd.DataFrame.from_dict(Dictionary,orient='index', dtype="str")
-    #Uniprot_DF.columns = ["Accesion", "Gene", "Organism", "Taxonomy", "KEGG", "Function", "Compartment", "Process"]
-    for column in Uniprot_DF:
-        Uniprot_DF[column] = Uniprot_DF[column].str[0]
-    #    Uniprot_DF.to_csv(Output_File, sep="\t")
-    with open(Output_File, 'a') as OutFile:
-        Uniprot_DF.to_csv(OutFile, header=False, sep="\t")
+    Dictionary = Parse_Uniprot(Uniprot_File, Output_File)
 
 if __name__ == "__main__":
     main()
