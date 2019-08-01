@@ -60,7 +60,7 @@ def Blast_SAM_Parser(SAM_File, Output_File):
 
         for key in Read_ID:
             Output_FH.write(Read_ID[key][1] + "\n")
-
+    Output_FH.close()
 
 ################################################################################
 """---3.0 Main Function---"""
