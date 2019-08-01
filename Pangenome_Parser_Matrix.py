@@ -23,13 +23,13 @@ import numpy as np
 ################################################################################
 """---2.0 Define Functions---"""
 
-def Pangenome(Matrix, Core = 80, Flexible = 50, Bootstraps = 100):
+def Pangenome(Matrix, Core = 80, Flexible = 50, Permutations = 100):
     # Read input matrix into a dataframe
     Pangenome_Matrix = pd.read_csv(Matrix, sep="\t")
     Num_Genomes = Pangenome_Matrix.shape[1]
     Record_count = 0
     PG_Dictionary = {}
-    # Iterate through bootstraps.
+    # Iterate through permutations.
     for boot in range(1, Num_Genomes+1):
         # Sample from 1 to number of genomes provided.
         for step in range(1, Num_Genomes):
@@ -114,7 +114,7 @@ def Pangenome_Plot(Pangenome_Table, Output_Files_Prefix):
     plt.scatter(Pangenome_Table['Num_Genomes'], Pangenome_Table.iloc[:,3], alpha = 0.08, color = 'g')
     plt.plot(Pangenome_Table['Num_Genomes'], out.best_fit, 'r-')
     plt.plot(Pangenome_Table['Num_Genomes'], out2.best_fit, 'r-')
-    plt.savefig(Output_Files_Prefix + '.png', dpi=300)
+    plt.savefig(Output_Files_Prefix + '.pdf', dpi=300)
 #plt.plot(Pangenome_Table['Num_Genomes'],yy, "k-")
 
 #%%
@@ -180,10 +180,10 @@ def main():
                                     'Optional Database Parameters: See ' + argv[0] + ' -h')
     parser.add_argument("-i", "--inputFile", dest='Input_Matrix', required=True, help="Input FastA file")
     parser.add_argument("-o", "--outputPrefix", dest='Output_Files_Prefix', required=False, default = 'Pangenome', help="Prefix for the output files.")
-    parser.add_argument("--core", dest='Core', required=False, default = 80, help="Percentage of genomes with an OC to be considered core, by default 80")
-    parser.add_argument("--flex", dest='Flexible', required=False, default = 50, help="Percentage of genomes with an OC to be considered part of the flexible genome, by default 50")
+    parser.add_argument("--core", dest='Core', required=False, type = int, default = 80, help="Percentage of genomes with an OC to be considered core, by default 80")
+    parser.add_argument("--flex", dest='Flexible', required=False, type = int, default = 50, help="Percentage of genomes with an OC to be considered part of the flexible genome, by default 50")
     parser.add_argument("--plot", dest='Build_Plot', required=False, action='store_true', help="True/False. Build the plot with the Pan, Core and Flexible genomes, by default false")
-    parser.add_argument("--bootstrap", dest='Bootstraps', required=False, default= 100, help="Number of permutations to execute, by default 100")
+    parser.add_argument("--permutation", dest='Permutations', required=False, type = int, default= 100, help="Number of permutations to execute, by default 100")
 
     args = parser.parse_args()
 
@@ -193,10 +193,10 @@ def main():
     Core = args.Core
     Flexible = args.Flexible
     Build_Plot = args.Build_Plot
-    Bootstraps = args.Bootstraps
+    Permutations = args.Permutations
 
     # Run matrix Parser and save matrix
-    Pangenome_Table = Pangenome(Input_Matrix, Core, Flexible, Bootstraps)
+    Pangenome_Table = Pangenome(Input_Matrix, Core, Flexible, Permutations)
     Pangenome_Table.to_csv(Output_Files_Prefix + '.tsv', sep="\t", index=False)
 
     if Build_Plot == True:
