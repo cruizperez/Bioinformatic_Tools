@@ -28,7 +28,7 @@ import pandas as pd
 
 def Parse_Uniprot(Uniprot_Dat, Output, Header = False):
     Uniprot_Dictionary = defaultdict(list)
-    Output = open(Output, 'w')
+    Output = open(Output, 'a')
     if Header == True:
         Output.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format("ID", "Accession", "Gene_Name", "Organism", "Taxonomy", "Function", "Compartment", "Process"))
     with open(Uniprot_Dat) as Uniprot:
