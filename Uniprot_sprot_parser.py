@@ -26,10 +26,11 @@ import pandas as pd
 ################################################################################
 """---2.0 Define Functions---"""
 
-def Parse_Uniprot(Uniprot_Dat, Output):
+def Parse_Uniprot(Uniprot_Dat, Output, Header = False):
     Uniprot_Dictionary = defaultdict(list)
-    Output = open("Output.txt", 'w')
-    Output.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format("ID", "Accession", "Gene_Name", "Organism", "Taxonomy", "Function", "Compartment", "Process"))
+    Output = open(Output, 'w')
+    if Header == True:
+        Output.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format("ID", "Accession", "Gene_Name", "Organism", "Taxonomy", "Function", "Compartment", "Process"))
     with open(Uniprot_Dat) as Uniprot:
         ID = ""
         Accession = ""
@@ -88,11 +89,13 @@ def main():
                                     '''\nGlobal mandatory parameters: [Input Uniprot.dat File]\n'''
                                     '''\nOptional Database Parameters: See ''' + sys.argv[0] + ' -h')
     parser.add_argument('-i', '--input', dest='Uniprot_File', action='store', required=True, help='Uniprot.dat file to parse')
-    parser.add_argument('-o', '--output', dest='Output_File', action='store', required=False, help='Output table, if none "Uniprot_Accessions.tab".', default="Uniprot_Accessions.tab")
+    parser.add_argument('-o', '--output', dest='Output_File', action='store', required=False, help='Output table')
+    parser.add_argument('--header', dest='Headers', action='store_true', required=False, help='Output table should contain headers, False by default')
     args = parser.parse_args()
 
     Uniprot_File = args.Uniprot_File
     Output_File = args.Output_File
+    Headers = args.Headers
 
     # Create empty dataframe with colnames.
     #with open(Output_File, 'w') as OutFile:
