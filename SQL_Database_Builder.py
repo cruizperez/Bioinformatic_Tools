@@ -16,7 +16,7 @@ you must provide a list of headers as -h header1,header2,header3...
 ################################################################################
 """---1.0 Define Functions---"""
 
-def Create_Table(Database, Input_Table, Table_Name, Column_Names = None, Index_Name):
+def Create_Table(Database, Input_Table, Table_Name, Index_Name, Column_Names = None):
     import sqlite3
     import csv
 
@@ -88,7 +88,7 @@ def main():
     Index_Name = args.Index_Name
     Headers = args.Headers
 
-    Create_Table(Database, Input_Table, Table_name, Headers, Index_Name)
+    Create_Table(Database, Input_Table, Table_name, Index_Name, Headers)
 
 
 if __name__ == "__main__":
