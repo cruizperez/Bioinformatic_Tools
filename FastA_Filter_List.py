@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 
-"""------------------------- 0.0 Import Modules -----------------------------"""
-from sys import argv
-import argparse
-from Bio.SeqIO.FastaIO import SimpleFastaParser
-
 """----------------------------- 1.0 Define Functions -----------------------------"""
 
-def FastA_Filter_List(List, FastaFile, Reverse, Output):
+def FastA_Filter_List(FastaFile, Output, List, Reverse=False):
+    from Bio.SeqIO.FastaIO import SimpleFastaParser
     Seq_ID_list = []
     Records = 0
-    with open(List) as Seq_IDs:
-        for line in Seq_IDs:
-            line = line.strip()
-            Seq_ID_list.append(line)
-            Records += 1
+    if type(List) == list:
+        Seq_ID_list = List
+        Records = len(Seq_ID_list)
+    else:
+        with open(List) as Seq_IDs:
+            for line in Seq_IDs:
+                line = line.strip().split()[0]
+                Seq_ID_list.append(line)
+                Records += 1
     Fasta_out = open(Output, 'w')
     with open(FastaFile) as Fasta_in:
         if Reverse == True:
@@ -34,21 +34,34 @@ def FastA_Filter_List(List, FastaFile, Reverse, Output):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='''Filter a FastA file based ona provided list of IDs. It can exclude or retrieve the sequences using the --reverse flag'''
-                                    'Global mandatory parameters: [FastA_File] [Output_File] [ID List File]\n'
-                                    'Optional Database Parameters: See ' + argv[0] + ' -h')
+    import argparse
+    from sys import argv
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
+    description='''Filter a FastA file based ona provided list of IDs (file or input).\n'''
+    '''It can exclude or retrieve the sequences using the --reverse flag\n'''
+    '''Usage: ''' + argv[0] + ''' -f [FastA File] -o [Output File] -l [File with IDs] OR -i [ID list]\n'''
+    '''Global mandatory parameters: [FastA_File] [Output_File] [ID List File]\n'''
+    'Optional Database Parameters: See ' + argv[0] + ' -h')
     parser.add_argument('-f', '--fasta', dest='Fasta_File', action='store', required=True, help='FastA file to filter')
     parser.add_argument('-o', '--output', dest='Output_File', action='store', required=True, help='Output FastA file with retrieved sequences')
-    parser.add_argument('-l', '--list', dest='ID_List', action='store', required=True, help='List of IDs to filter')
+    parser.add_argument('-l', '--list', dest='ID_File', action='store', required=False, help='File with list of IDs to filter.')
+    parser.add_argument('-i', '--id', dest='ID_List', action='store', required=False, help='Comma-separated IDs to filter: ID1,ID2,ID3')
     parser.add_argument('--reverse', action='store_true', help='Exclude the sequences in the list file. By default False, i.e. retrieves those in the list')
     args = parser.parse_args()
 
     Fasta_File = args.Fasta_File
     Output_File = args.Output_File
+    ID_File = args.ID_File
     ID_List = args.ID_List
     Reverse = args.reverse
 
-    FastA_Filter_List(ID_List, Fasta_File, Reverse, Output_File)
+    if ID_List == None:
+        FastA_Filter_List(Fasta_File, Output_File, ID_File, Reverse)
+    elif ID_File == None:
+        ID_List = ID_List.split(",")
+        FastA_Filter_List(Fasta_File, Output_File, ID_List, Reverse)
+    else:
+        raise ValueError("Did you provide the IDs to filter?")
 
 if __name__ == "__main__":
     main()
