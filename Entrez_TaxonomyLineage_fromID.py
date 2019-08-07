@@ -106,7 +106,7 @@ def main():
     parser.add_argument('--item', dest='Item', action='store', required=False, default="id", help='Item to recover, e.g., id (default) or lineage.')
     parser.add_argument('-l', '--list', dest='ID_List', action='store', required=False, help='Comma-separated list IDs, e.g., ID1,ID2,ID3...')
     parser.add_argument('-f', '--fileID', dest='ID_File', action='store', required=False, help='File with IDs to search, one per line')
-    parser.add_argument('-o', '--output', dest='Output_Table', action='store', required=False, help='Table to which the taxonomy and lineages will be printed.')
+    parser.add_argument('-o', '--output', dest='Output_Table', action='store', required=True, help='Table to which the taxonomy and lineages will be printed.')
     parser.add_argument('-e', '--email', dest='Email', action='store', required=True, help='Email to tell NCBI who you are.')
     parser.add_argument('-a', '--api', dest='API', action='store', required=False, help='API key for large queries')
     parser.add_argument('--header', dest='Header', action='store_true', required=False, help='Add header to output, False by default')
