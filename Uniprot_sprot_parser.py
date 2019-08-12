@@ -8,12 +8,7 @@
 # Date:		 29 July 2019
 
 # Description: This script parses a Uniprot.dat file and outputs a table with
-# the ID, Accession, Gene Name, Organism, Taxonomy, KEGG ID, Function, Compartment, and Process.
-# To use in a faster way use gnu parallel as follows:
-# cat InputFile.dat | parallel --jobs [#] --pipe --recend '//' cat \> File_{#}\;
-# /mnt/c/Users/Cruiz/Documents/GitHub/Misc_Tools/Uniprot_sprot_parser.py -i File_{#} -o Test.parsed\; rm File_{#}\;
-# This will split the file into records, execute the script and remove the splitted file. Remember to give it a
-# single output so everything will be in the same file.
+# the ID, Accession, Gene Name, KO NUmber, Organism, Taxonomy, KEGG ID, Function, Compartment, and Process.
 ########################################################################
 """
 
@@ -35,6 +30,7 @@ def Parse_Uniprot(Uniprot_Dat, Output, Header = False):
         ID = ""
         Accession = ""
         Name = ""
+        KO = ""
         Organism = ""
         Taxonomy = ""
         Function = ""
@@ -50,7 +46,6 @@ def Parse_Uniprot(Uniprot_Dat, Output, Header = False):
             elif "RecName" in line:
                 Name = line.split("Full=")[1]
                 Name = Name.split("{")[0].strip()
-                #Uniprot_Dictionary[ID][1].append(Name)
             elif "OS  " in line:
                 Organism = ' '.join([Organism, line.split("OS")[1].strip()])
             elif "OC  " in line:
@@ -65,10 +60,11 @@ def Parse_Uniprot(Uniprot_Dat, Output, Header = False):
                 elif "; P:" in line:
                     Process = ''.join([Process, line.split("GO;")[1].strip(), " -- "])
             elif "//\n" in line:
-                Output.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(ID, Accession, Name, Organism, Taxonomy, Function, Compartment, Process))
+                Output.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(ID, Accession, Name, KO, Organism, Taxonomy, Function, Compartment, Process))
                 ID = ""
                 Accession = ""
                 Name = ""
+                KO = ""
                 Organism = ""
                 Taxonomy = ""
                 Function = ""
