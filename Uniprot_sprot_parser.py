@@ -16,7 +16,7 @@
 """---1.0 Define Functions---"""
 
 def Parse_Uniprot(Uniprot_Dat, Output, Header = False):
-    Output = open(Output, 'a')
+    Output = open(Output, 'w')
     if Header == True:
         Output.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format("ID", "Accession", "Gene_Name", "KO Number", "Organism", "Taxonomy", "Function", "Compartment", "Process"))
     with open(Uniprot_Dat) as Uniprot:
@@ -30,7 +30,7 @@ def Parse_Uniprot(Uniprot_Dat, Output, Header = False):
         Compartment = ""
         Process = ""
         for line in Uniprot:
-            if line.startswith("ID"):
+            if line.startswith("ID", 0):
                 ID = line.split()[1]
             elif "AC  " in line:
                 Accession = line.split()[1]
@@ -43,7 +43,7 @@ def Parse_Uniprot(Uniprot_Dat, Output, Header = False):
                 Taxonomy = ' '.join([Taxonomy, line.split("OC")[1].strip()])
             elif "DR  " in line:
                 if "KO;" in line:
-                    KO = line.split()[2]
+                    KO = line.split()[2].replace(";", "")
                 elif "; F:" in line:
                     Function = ''.join([Function, line.split("GO;")[1].strip(), " -- "])
                 elif "; C:" in line:
