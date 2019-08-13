@@ -41,10 +41,10 @@ def Parse_Uniprot(Uniprot_Dat, Output, Header = False):
                 Organism = ' '.join([Organism, line.split("OS")[1].strip()])
             elif "OC  " in line:
                 Taxonomy = ' '.join([Taxonomy, line.split("OC")[1].strip()])
-            elif "DR  " in line:
-                if "KO;" in line:
-                    KO = line.split()[2].replace(";", "")
-                elif "; F:" in line:
+            elif "DR   KO;" in line:
+                KO = line.split()[2].replace(";", "")
+            elif "DR   GO;" in line:
+                if "; F:" in line:
                     Function = ''.join([Function, line.split("GO;")[1].strip(), " -- "])
                 elif "; C:" in line:
                     Compartment = ''.join([Compartment, line.split("GO;")[1].strip(), " -- "])
