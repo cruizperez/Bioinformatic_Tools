@@ -13,16 +13,9 @@
 """
 
 ################################################################################
-"""---1.0 Import Modules---"""
-
-from collections import defaultdict
-import pandas as pd
-
-################################################################################
-"""---2.0 Define Functions---"""
+"""---1.0 Define Functions---"""
 
 def Parse_Uniprot(Uniprot_Dat, Output, Header = False):
-    Uniprot_Dictionary = defaultdict(list)
     Output = open(Output, 'a')
     if Header == True:
         Output.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format("ID", "Accession", "Gene_Name", "KO Number", "Organism", "Taxonomy", "Function", "Compartment", "Process"))
@@ -39,10 +32,8 @@ def Parse_Uniprot(Uniprot_Dat, Output, Header = False):
         for line in Uniprot:
             if "ID  " in line:
                 ID = line.split()[1]
-                Uniprot_Dictionary[ID] = [[] for k in range(8)]
             elif "AC  " in line:
                 Accession = line.split()[1]
-                Uniprot_Dictionary[ID][0].append(line.split()[1].replace(";", ""))
             elif "RecName" in line:
                 Name = line.split("Full=")[1]
                 Name = Name.split("{")[0].strip()
