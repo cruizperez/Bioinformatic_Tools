@@ -30,7 +30,7 @@ def Create_Table(Database, Input_Table, Table_Name, Index_Name, Column_Names = N
         Header = True
         f = open(Input_Table)
         columns = f.readline()
-        columns = columns..strip().split("\t")
+        columns = columns.strip().split("\t")
         f.close()
     else:
         columns = Column_Names
