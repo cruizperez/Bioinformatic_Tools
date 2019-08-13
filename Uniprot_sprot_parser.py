@@ -30,7 +30,7 @@ def Parse_Uniprot(Uniprot_Dat, Output, Header = False):
         Compartment = ""
         Process = ""
         for line in Uniprot:
-            if "ID  " in line:
+            if line.startswith("ID"):
                 ID = line.split()[1]
             elif "AC  " in line:
                 Accession = line.split()[1]
