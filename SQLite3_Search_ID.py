@@ -110,7 +110,10 @@ def main():
             for line in ID_File:
                 line = line.strip().split()
                 Gene = line[Gene_Col - 1]
-                Hit = line[ID_Col - 1]
+                if Database == "Swissprot" or Database == "Trembl":
+                    Hit = line[ID_Col - 1].split("|")[2]
+                else:
+                    Hit = line[ID_Col - 1]
                 Annotation_Dict[Hit] = [Gene]
                 Input_List.append(Hit)
         # Get list of annotations
@@ -128,7 +131,10 @@ def main():
         with open(Input_Table) as ID_File:
             for line in ID_File:
                 line = line.strip().split()
-                Hit = line[ID_Col - 1]
+                if Database == "Swissprot" or Database == "Trembl":
+                    Hit = line[ID_Col - 1].split("|")[2]
+                else:
+                    Hit = line[ID_Col - 1]
                 Input_List.append(Hit)
         Annotation_List = Search_Table(SQL_database, Input_List, Database, Output=Output_Table, Standalone=True)
 
