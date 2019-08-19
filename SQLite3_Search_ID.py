@@ -48,6 +48,7 @@ def Search_Table(SQL_database, Input_List, Database, Output = None, Standalone =
         for ID in (Input_List):
             cur.execute("SELECT * FROM " + Database + " WHERE ID=?", (ID,))
             rows = cur.fetchall()
+            print(rows)
             Annotation_List.append(rows[0])
         return Annotation_List
 
