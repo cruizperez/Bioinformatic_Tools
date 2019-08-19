@@ -39,7 +39,10 @@ def Search_Table(SQL_database, Input_List, Database, Output = None, Standalone =
         for ID in (Input_List):
             cur.execute("SELECT * FROM " + Database + " WHERE ID=?", (ID,))
             rows = cur.fetchall()
-            Annotation_List.append(rows[0])
+            try:
+                Annotation_List.append(rows[0])
+            except:
+                pass
         Annotation_DF = pd.DataFrame(Annotation_List, columns=Col_Names)
         Annotation_DF.set_index('ID', inplace=True)
         Annotation_DF.to_csv(Output, sep="\t")
@@ -48,8 +51,10 @@ def Search_Table(SQL_database, Input_List, Database, Output = None, Standalone =
         for ID in (Input_List):
             cur.execute("SELECT * FROM " + Database + " WHERE ID=?", (ID,))
             rows = cur.fetchall()
-            print(rows)
-            Annotation_List.append(rows[0])
+            try:
+                Annotation_List.append(rows[0])
+            except:
+                pass
         return Annotation_List
 
     cur.close()
