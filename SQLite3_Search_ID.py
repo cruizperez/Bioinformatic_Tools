@@ -29,7 +29,7 @@ def Search_Table(SQL_database, Input_List, Database, Output = None, Standalone =
     # Search the DB and append results to Annotation_List
     if Standalone:
         # Set column names.
-        if Database == "Uniprot":
+        if Database == "Swissprot":
             Col_Names = ['ID' , 'Accession', 'Name', 'KO_Uniprot', 'Organism', 'Taxonomy', 'Function', 'Compartment', 'Process']
         elif Database == "Trembl":
             Col_Names = ['ID' , 'Accession', 'Name', 'KO_Uniprot', 'Organism', 'Taxonomy', 'Function', 'Compartment', 'Process']
