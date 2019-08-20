@@ -91,7 +91,6 @@ def main():
 
     Input_Fasta = args.Input_Fasta
     OTU_List = args.OTU_List
-    print(OTU_List)
     Output_Table = args.Output_Table
     Transpose = args.Transpose
 

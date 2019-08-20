@@ -18,6 +18,10 @@ from Bio import Entrez
 ################################################################################
 """---2.0 Define Functions---"""
 def Post_IDs(List, Database, email, API= None):
+    if Database == "biosample":
+        import re
+        for index, item in enumerate(List):
+            List[index] = re.sub('[A-Z]+', '', item)
     Entrez.api_key = API
     Entrez.email = email
     search_results = Entrez.read(Entrez.epost(Database, id=",".join(List)))
