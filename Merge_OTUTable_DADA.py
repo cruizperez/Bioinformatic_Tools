@@ -80,13 +80,13 @@ def main():
             description='''This script merges OTU tables from DADA2 into a single one.\n'''
             '''It takes a representative fasta sequence and multiple OTU tables to be merged.\n'''
             '''The list of OTU tables should be separated by space, e.g., -l OTU_Table_1 OTU_Table_2 OTU_Table_3 ...\n'''
-            '''Usage: ''' + sys.argv[0] + ''' -i [FastA File] -o [Output Table] -l [OTU Table List]\n'''
+            '''Usage: ''' + sys.argv[0] + ''' -i [FastA File] -o [Output Table] -l [OTU_Table_1  OTU_Table_2...]\n'''
             '''Global mandatory parameters: -i [FastA File] -o [Output Table] -l [OTU Table List]\n'''
             '''Optional Database Parameters: See ''' + sys.argv[0] + ' -h')
     parser.add_argument('-i', '--input', dest='Input_Fasta', action='store', required=True, help='Input Fasta file with representative sequences')
-    parser.add_argument('-l', '--list', dest='OTU_List', action='store', nargs='+', required=True, help='OTU table list')
+    parser.add_argument('-l', '--list', dest='OTU_List', action='store', nargs='+', required=True, help='OTU table list, Separated by spaces.')
     parser.add_argument('-o', '--output', dest='Output_Table', action='store', required=True, help='Output OTU Table')
-    parser.add_argument('--tranpose', dest='Transpose', action='store_true', required=False, help='Output as sample in columns, OTU in rows, by default the other way.')
+    parser.add_argument('--transpose', dest='Transpose', action='store_true', required=False, help='Output as sample in columns, OTU in rows, by default the other way.')
     args = parser.parse_args()
 
     Input_Fasta = args.Input_Fasta
