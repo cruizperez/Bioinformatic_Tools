@@ -34,7 +34,7 @@ def Average_Calculator(InputFile):
     Compound = time.strftime('%H:%M:%S', time.gmtime(Seconds_Mean))
 
     print("Hours\tMinutes\tSeconds\tCompounds\n")
-    print("{}\t{}\t{}\t{}\n".format((Seconds_Mean/60**2),(Seconds_Mean/60),Seconds_Mean,Compound)
+    print("{}\t{}\t{}\t{}\n".format((Seconds_Mean/60**2),(Seconds_Mean/60),Seconds_Mean,Compound))
 
 
 ################################################################################
