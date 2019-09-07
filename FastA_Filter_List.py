@@ -5,18 +5,15 @@
 def FastA_Filter_List(FastaFile, Output, List, Reverse=False):
     from Bio.SeqIO.FastaIO import SimpleFastaParser
     Seq_ID_list = []
-    Records = 0
     if type(List) == list:
         Seq_ID_list = List
         Records = len(Seq_ID_list)
     else:
-        with open(List) as Seq_IDs:
-            for line in Seq_IDs:
-                line = line.strip().split()[0]
-                Seq_ID_list.append(line)
-                Records += 1
-    Fasta_out = open(Output, 'w')
-    with open(FastaFile) as Fasta_in:
+        import pandas as pd
+        List_DF = pd.read_csv(List, delim_whitespace=True)
+        Seq_ID_list = df[0].tolist()
+    Records = len(Seq_ID_list)
+    with open(FastaFile) as Fasta_in, open(Output, 'w') as Fasta_out:
         if Reverse == True:
             print("Excluding " + str(Records) + " records from output")
             for title, seq in SimpleFastaParser(Fasta_in):
