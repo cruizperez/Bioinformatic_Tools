@@ -119,7 +119,10 @@ def main():
         # Get list of annotations
         Annotation_List = Search_Table(SQL_database, Input_List, Database, Standalone=False)
         for record in Annotation_List:
-            Annotation_Dict[record[0]].extend(list(record[1:]))
+            if len(Annotation_Dict[record[0]]) > 2:
+                pass
+            else:
+                Annotation_Dict[record[0]].extend(list(record[1:]))
 
         Annotation_DF = pd.DataFrame.from_dict(Annotation_Dict, orient='index')
         Annotation_DF.reset_index(inplace=True)
