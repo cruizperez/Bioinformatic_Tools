@@ -4,7 +4,7 @@
 ########################################################################
 # Author:	   Carlos Ruiz
 # Intitution:   Georgia Institute of Technology
-# Version:	  1.0
+# Version:	  2.0
 # Date:		 August 12 2019
 
 # Description: This searches IDs provided in a given database.
@@ -16,7 +16,7 @@
 """---1.0 Define Functions---"""
 
 
-def Search_Table(SQL_database, Input_List, Database, Output = None, Standalone = True):
+def Search_Table(SQL_database, Input_List, Database, Output, Columns = None, Standalone = True):
     import pandas as pd
     import sqlite3
     
@@ -27,6 +27,9 @@ def Search_Table(SQL_database, Input_List, Database, Output = None, Standalone =
     Annotation_List = []
 
     # Search the DB and append results to Annotation_List
+    print("\t".join(Columns))
+    #with open(Output) as Final_Table:
+
     if Standalone:
         # Set column names.
         if Database == "Swissprot":
