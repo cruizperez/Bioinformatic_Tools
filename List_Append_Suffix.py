@@ -16,7 +16,7 @@
 
 
 def Line_Appender(Input_File, Output_File, String, Prefix = False):
-    with open(Input_File) as Input, open(Output_File) as Output:
+    with open(Input_File) as Input, open(Output_File, 'w') as Output:
         if Prefix == True:
             for line in Input:
                 line = line.strip()
