@@ -20,11 +20,11 @@ def Line_Appender(Input_File, Output_File, String, Prefix = False):
         if Prefix == True:
             for line in Input:
                 line = line.strip()
-                Output.write("{}{}".format(String,line))
+                Output.write("{}{}\n".format(String,line))
         else:
             for line in Input:
                 line = line.strip()
-                Output.write("{}{}".format(line,String))
+                Output.write("{}{}\n".format(line,String))
 
 
 ################################################################################
