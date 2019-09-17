@@ -17,49 +17,27 @@
 
 
 def Search_Table(SQL_database, Input_List, Database, Output, Columns = None, Standalone = True):
-    import pandas as pd
     import sqlite3
     
     conn = sqlite3.connect(SQL_database)
     cur = conn.cursor()
 
-    # Create empty list to store annotations.
-    Annotation_List = []
-
     # Search the DB and append results to Annotation_List
-    print("\t".join(Columns))
-    #with open(Output) as Final_Table:
-
-    if Standalone:
-        # Set column names.
-        if Database == "Swissprot":
-            Col_Names = ['ID' , 'Accession', 'Name', 'KO_Uniprot', 'Organism', 'Taxonomy', 'Function', 'Compartment', 'Process']
-        elif Database == "Trembl":
-            Col_Names = ['ID' , 'Accession', 'Name', 'KO_Uniprot', 'Organism', 'Taxonomy', 'Function', 'Compartment', 'Process']
-        elif Database == "RefSeq":
-            Col_Names = ['ID', 'Gene_Name', 'Taxonomy', 'Note']
-
-        for ID in (Input_List):
-            cur.execute("SELECT * FROM " + Database + " WHERE ID=?", (ID,))
-            rows = cur.fetchall()
-            try:
-                Annotation_List.append(rows[0])
-            except:
-                pass
-        Annotation_DF = pd.DataFrame(Annotation_List, columns=Col_Names)
-        Annotation_DF.set_index('ID', inplace=True)
-        Annotation_DF.to_csv(Output, sep="\t")
-
-    else:
-        for ID in (Input_List):
-            cur.execute("SELECT * FROM " + Database + " WHERE ID=?", (ID,))
-            rows = cur.fetchall()
-            try:
-                Annotation_List.append(rows[0])
-            except:
-                pass
-        return Annotation_List
-
+    with open(Output, 'w') as Final_Table:
+        Final_Table.write("{}\n".format("\t".join(Columns)))
+        if Standalone == False:
+            for ID in (Input_List):
+                cur.execute("SELECT * FROM " + Database + " WHERE ID=?", (ID[1],))
+                rows = cur.fetchall()
+                Annotation = "\t".join(rows[0])
+                Final_Table.write("{}\t{}\n".format(ID[0], Annotation))
+        else:
+            for ID in (Input_List):
+                cur.execute("SELECT * FROM " + Database + " WHERE ID=?", (ID,))
+                rows = cur.fetchall()
+ 
+                Annotation = "\t".join(rows[0])
+                Final_Table.write("{}\n".format(Annotation))
     cur.close()
     conn.close()
 
@@ -69,7 +47,6 @@ def Search_Table(SQL_database, Input_List, Database, Output, Columns = None, Sta
 
 def main():
     import argparse, sys
-    import pandas as pd
     # Setup parser for arguments.
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
             description='''This script builds a sqlite database from a tab separated table.\n'''
@@ -78,7 +55,7 @@ def main():
             '''Usage: ''' + sys.argv[0] + ''' -i [Input Table] -d [Database Name] -t [Table Name] -n [Index Name] --header [Header List]\n'''
             '''Global mandatory parameters: -i [Input Table] -d [Database Name] -t [Table Name] -n [Index Name]\n'''
             '''Optional Database Parameters: See ''' + sys.argv[0] + ' -h')
-    parser.add_argument('-i', '--input', dest='Input_Table', action='store', required=True, help='Input tab-delimited table to parse, by default assumes headers are present')
+    parser.add_argument('-i', '--input', dest='Input_Table', action='store', required=True, help='Input tab-delimited table to parse, by default assumes no headers are present')
     parser.add_argument('-o', '--output', dest='Output_Table', action='store', required=True, help='Output tab-delimited table to store annotations')
     parser.add_argument('-s', '--sql_database', dest='SQL_database', action='store', required=True, help='SQL database where the annotations are stored')
     parser.add_argument('--gene_col', dest='Gene_Col', action='store', required=False, type=int,
@@ -106,8 +83,7 @@ def main():
 
     # Create table with or without gene ids
     if Gene_Col != None:
-        Col_Names.insert(1,'Gene_ID')
-        Annotation_Dict = {}
+        Col_Names.insert(0,'Gene_ID')
         Input_List = []
         with open(Input_Table) as ID_File:
             for line in ID_File:
@@ -117,21 +93,10 @@ def main():
                     Hit = line[ID_Col - 1].split("|")[2]
                 else:
                     Hit = line[ID_Col - 1]
-                Annotation_Dict[Hit] = [Gene]
-                Input_List.append(Hit)
+                Input_List.append((Gene, Hit))
         # Get list of annotations
-        Annotation_List = Search_Table(SQL_database, Input_List, Database, Standalone=False)
-        for record in Annotation_List:
-            if len(Annotation_Dict[record[0]]) > 2:
-                pass
-            else:
-                Annotation_Dict[record[0]].extend(list(record[1:]))
+        Search_Table(SQL_database, Input_List, Database, Output_Table, Col_Names, Standalone=False)
 
-        Annotation_DF = pd.DataFrame.from_dict(Annotation_Dict, orient='index')
-        Annotation_DF.reset_index(inplace=True)
-        Annotation_DF.columns = Col_Names
-        Annotation_DF.set_index('Gene_ID', inplace=True)
-        Annotation_DF.to_csv(Output_Table, sep="\t")
     else:
         Input_List = []
         with open(Input_Table) as ID_File:
@@ -142,7 +107,7 @@ def main():
                 else:
                     Hit = line[ID_Col - 1]
                 Input_List.append(Hit)
-        Annotation_List = Search_Table(SQL_database, Input_List, Database, Output=Output_Table, Standalone=True)
+        Search_Table(SQL_database, Input_List, Database, Output_Table, Col_Names, Standalone=True)
 
 
 if __name__ == "__main__":
