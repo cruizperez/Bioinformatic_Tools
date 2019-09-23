@@ -15,7 +15,7 @@
 ################################################################################
 """---1.0 Define Functions---"""
 
-def MCL_to_List(MCL_Output, Contig_Folder, Output_Prefix):
+def MCL_to_List(MCL_Output, Output_Prefix):
     """ Parses a MCL output and returns a dictionary with contigs that belong
         to each cluster and writes a FastA file with unclustered contigs. """
     import fileinput
@@ -35,7 +35,6 @@ def MCL_to_List(MCL_Output, Contig_Folder, Output_Prefix):
             else:
                 for genome in line:
                     Unclustered_Files.append(genome)
-    Unclustered_Files = [Contig_Folder + "/" + s for s in Unclustered_Files]
     print(len(Unclustered_Files))
     with open("{}_unclustered.fasta".format(Output_Prefix), 'w') as Unclust:
         for element in Unclustered_Files:
@@ -45,7 +44,7 @@ def MCL_to_List(MCL_Output, Contig_Folder, Output_Prefix):
     return Output_dict
     # ------------------------
 
-def Cluster_to_Alignment(Cluster_Dict, Contig_Folder, Output_Prefix, Extension=".fa"):
+def Cluster_to_Alignment(Cluster_Dict, Output_Prefix, Extension=".fa"):
     import os
     #from pymummer import coords_file, alignment, nucmer
     from Bio.SeqIO.FastaIO import SimpleFastaParser
@@ -56,7 +55,7 @@ def Cluster_to_Alignment(Cluster_Dict, Contig_Folder, Output_Prefix, Extension="
         for cluster, genomes in Cluster_Dict.items():
             Sizes = []
             for genome in genomes:
-                path = pathlib.Path(Contig_Folder) / genome
+                path = pathlib.Path(genome)
                 with open(path, 'r') as Fasta:
                     for title, seq in SimpleFastaParser(Fasta):
                         Sizes.append((title, len(seq)))
@@ -65,7 +64,7 @@ def Cluster_to_Alignment(Cluster_Dict, Contig_Folder, Output_Prefix, Extension="
             for index, value in enumerate(Sizes):
                 if index == 0:
                     genome = value[0] + Extension
-                    Seed_genome = pathlib.Path(Contig_Folder) / genome
+                    Seed_genome = pathlib.Path(genome)
                     with open(Seed_genome) as Fasta_Genome:
                         for title, seq in SimpleFastaParser(Fasta_Genome):
                             Output.write(">{}\n{}\n".format(title,seq))
@@ -95,7 +94,7 @@ def main():
             '''Global mandatory parameters: -m [MCL Output] -d [Contig Directory] -p [Output Prefix]\n'''
             '''Optional Database Parameters: See ''' + argv[0] + ' -h')
     parser.add_argument('-m', '--mclFile', dest='MCL_File', action='store', required=True, help='Input MCL file.')
-    parser.add_argument('-d', '--directory', dest='Contig_Dir', action='store', required=True, help='Directory where contigs are located (one per file).')
+    #parser.add_argument('-d', '--directory', dest='Contig_Dir', action='store', required=True, help='Directory where contigs are located (one per file).')
     parser.add_argument('-p', '--prefix', dest='Output_Prefix', action='store', required=True, help='Prefix of output files.')
     parser.add_argument('-e', '--extension', dest='Extension', action='store', required=True, help='Extension of contig files')
     args = parser.parse_args()
@@ -105,8 +104,8 @@ def main():
     Output_Prefix = args.Output_Prefix
     Extension = args.Extension
 
-    Clusters = MCL_to_List(MCL_File, Contig_Dir, Output_Prefix)
-    Cluster_to_Alignment(Clusters, Contig_Dir, Output_Prefix, Extension)
+    Clusters = MCL_to_List(MCL_File, Output_Prefix)
+    Cluster_to_Alignment(Clusters, Output_Prefix, Extension)
 
 if __name__ == "__main__":
     main()
