@@ -44,7 +44,7 @@ def MCL_to_List(MCL_Output, Output_Prefix):
     return Output_dict
     # ------------------------
 
-def Cluster_to_Alignment(Cluster_Dict, Output_Prefix, Extension=".fa"):
+def Cluster_to_Alignment(Cluster_Dict, Output_Prefix, ContigDir, Extension=".fa"):
     import os
     #from pymummer import coords_file, alignment, nucmer
     from Bio.SeqIO.FastaIO import SimpleFastaParser
@@ -60,11 +60,10 @@ def Cluster_to_Alignment(Cluster_Dict, Output_Prefix, Extension=".fa"):
                     for title, seq in SimpleFastaParser(Fasta):
                         Sizes.append((title, len(seq)))
             Sizes.sort(key=lambda tup: tup[1], reverse=True)
-            Seed_genome = None
             for index, value in enumerate(Sizes):
                 if index == 0:
                     genome = value[0] + Extension
-                    Seed_genome = pathlib.Path(genome)
+                    Seed_genome = pathlib.Path(ContigDir) / genome
                     with open(Seed_genome) as Fasta_Genome:
                         for title, seq in SimpleFastaParser(Fasta_Genome):
                             Output.write(">{}\n{}\n".format(title,seq))
@@ -96,14 +95,16 @@ def main():
     parser.add_argument('-m', '--mclFile', dest='MCL_File', action='store', required=True, help='Input MCL file.')
     parser.add_argument('-p', '--prefix', dest='Output_Prefix', action='store', required=True, help='Prefix of output files.')
     parser.add_argument('-e', '--extension', dest='Extension', action='store', required=True, help='Extension of contig files')
+    parser.add_argument('-d', '--directory', dest='ContigDir', action='store', required=True, help='Directory where contigs are located.')
     args = parser.parse_args()
 
     MCL_File = args.MCL_File
     Output_Prefix = args.Output_Prefix
     Extension = args.Extension
+    ContigDir = args.ContigDir
 
     Clusters = MCL_to_List(MCL_File, Output_Prefix)
-    Cluster_to_Alignment(Clusters, Output_Prefix, Extension)
+    Cluster_to_Alignment(Clusters, Output_Prefix, ContigDir, Extension)
 
 if __name__ == "__main__":
     main()
