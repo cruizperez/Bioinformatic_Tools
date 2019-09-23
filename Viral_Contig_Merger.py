@@ -35,7 +35,7 @@ def MCL_to_List(MCL_Output, Output_Prefix):
             else:
                 for genome in line:
                     Unclustered_Files.append(genome)
-    print(len(Unclustered_Files))
+    print("There are {} unclustered contigs.".format(len(Unclustered_Files)))
     with open("{}_unclustered.fasta".format(Output_Prefix), 'w') as Unclust:
         for element in Unclustered_Files:
             with open(element) as input_file:
@@ -90,17 +90,15 @@ def main():
     # Setup parser for arguments.
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
             description='''This script parses a MCL output into clutered and unclustered contigs\n'''
-            '''Usage: ''' + argv[0] + ''' -m [MCL Output] -d [Contig Directory] -p [Output Prefix] -e [Extension of files]\n'''
-            '''Global mandatory parameters: -m [MCL Output] -d [Contig Directory] -p [Output Prefix]\n'''
+            '''Usage: ''' + argv[0] + ''' -m [MCL Output] -p [Output Prefix] -e [Extension of files]\n'''
+            '''Global mandatory parameters: -m [MCL Output] -p [Output Prefix]\n'''
             '''Optional Database Parameters: See ''' + argv[0] + ' -h')
     parser.add_argument('-m', '--mclFile', dest='MCL_File', action='store', required=True, help='Input MCL file.')
-    #parser.add_argument('-d', '--directory', dest='Contig_Dir', action='store', required=True, help='Directory where contigs are located (one per file).')
     parser.add_argument('-p', '--prefix', dest='Output_Prefix', action='store', required=True, help='Prefix of output files.')
     parser.add_argument('-e', '--extension', dest='Extension', action='store', required=True, help='Extension of contig files')
     args = parser.parse_args()
 
     MCL_File = args.MCL_File
-    Contig_Dir = args.Contig_Dir
     Output_Prefix = args.Output_Prefix
     Extension = args.Extension
 
