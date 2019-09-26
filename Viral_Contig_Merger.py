@@ -60,13 +60,13 @@ def Cluster_to_Alignment(Cluster_Dict, Output_Prefix, ContigDir, Extension=".fa"
                     for title, seq in SimpleFastaParser(Fasta):
                         Sizes.append((title, len(seq)))
             Sizes.sort(key=lambda tup: tup[1], reverse=True)
-            for index, value in enumerate(Sizes):
-                if index == 0:
-                    genome = value[0] + Extension
-                    Seed_genome = pathlib.Path(ContigDir) / genome
-                    with open(Seed_genome) as Fasta_Genome:
-                        for title, seq in SimpleFastaParser(Fasta_Genome):
-                            Output.write(">{}\n{}\n".format(title,seq))
+            print("Finding representative in {} clusters".format(len(Sizes)))
+            for values in Sizes:
+                genome = values[0][0] + Extension
+                Seed_genome = pathlib.Path(ContigDir) / genome
+                with open(Seed_genome) as Fasta_Genome:
+                    for title, seq in SimpleFastaParser(Fasta_Genome):
+                        Output.write(">{}\n{}\n".format(title,seq))
 
 # TODO Try to dereplicate genomes...
                 # else:
