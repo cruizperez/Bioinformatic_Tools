@@ -27,7 +27,8 @@ def MCL_to_List(MCL_Output, Output_Folder=None, Contig_Folder=None):
     # Singletons
     Unclustered_Sequences = {}
     Unclustered_Fasta = Output_Folder.joinpath("Unclustered_Contigs.fasta")
-    Unclustered_Fasta.unlink()
+    if Unclustered_Fasta.exists():
+        Unclustered_Fasta.unlink()
     # List of cluster folders
     Cluster_List = []
 
