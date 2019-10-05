@@ -75,34 +75,7 @@ def Minimus2(Cluster_list):
         toAmos_File = Cluster.with_suffix('.afg') # Output for script toAmos
         Prefix = Cluster.with_suffix('') # Input prefix for Minimus2
         subprocess.Popen(["toAmos", "-s", Cluster, "-o", toAmos_File], stdout=subprocess.PIPE)
-        subprocess.Popen(["minimus2", Prefix], stdout=subprocess.PIPE)
-    with open("{}_Cluster_Rep.fasta".format(Output_Prefix), 'w') as Output:
-        for cluster, genomes in Cluster_Dict.items():
-            Sizes = []
-            for genome in genomes:
-                path = pathlib.Path(genome)
-                with open(path, 'r') as Fasta:
-                    for title, seq in SimpleFastaParser(Fasta):
-                        Sizes.append((title, len(seq)))
-            Sizes.sort(key=lambda tup: tup[1], reverse=True)
-            print("Finding representative in {} clusters".format(len(Sizes)))
-            for values in Sizes:
-                genome = values[0][0] + Extension
-                Seed_genome = pathlib.Path(ContigDir) / genome
-                with open(Seed_genome) as Fasta_Genome:
-                    for title, seq in SimpleFastaParser(Fasta_Genome):
-                        Output.write(">{}\n{}\n".format(title,seq))
-
-# TODO Try to dereplicate genomes...
-                # else:
-                #     Query_name = value[0] + ".fa"
-                #     Query_genome = pathlib.Path(Contig_Folder) / Query_name
-                #     runner = nucmer.Runner(Seed_genome, Query_genome, "Temp_Alignment_{}.coord".format(number), min_id = 95)
-                #     runner.run()
-                #     number+=1
-                #     file_reader = coords_file.reader("Temp_Alignment_{}.coord".format(number))
-                #     alignments = [coord for coord in file_reader if not coord.is_self_hit()] #Remove self hit
-
+        #subprocess.Popen(["minimus2", Prefix], stdout=subprocess.PIPE)
 
 ################################################################################
 """---2.0 Main Function---"""
