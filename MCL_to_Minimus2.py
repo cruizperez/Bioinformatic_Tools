@@ -68,10 +68,11 @@ def MCL_to_List(MCL_Output, Output_Folder=None, Contig_Folder=None):
 
 def Minimus2(Cluster_list):
     import pathlib as pl
+    import subprocess
 
     for Cluster in Cluster_list:
         toAmos_File = Cluster.with_suffix('.afg') # Output for script toAmos
-        
+        subprocess.Popen(["toAmos", "-s", Cluster, "-o", toAmos_File], stdout=subprocess.PIPE)
     with open("{}_Cluster_Rep.fasta".format(Output_Prefix), 'w') as Output:
         for cluster, genomes in Cluster_Dict.items():
             Sizes = []
