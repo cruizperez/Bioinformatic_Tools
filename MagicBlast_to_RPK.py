@@ -27,7 +27,7 @@ def Get_Genome_Sizes(Fasta_File):
     Genome_Sizes = {}
     with open(Fasta_File) as Fasta:
         for title, seq in SimpleFastaParser(Fasta):
-            if "VIRSorter" in title:
+            if "VC_" in title:
                 Genome = title
             else:
                 Genome = title.split("_")
@@ -44,7 +44,7 @@ def Calculate_Seq_Depth(MagicBlast_File, Genome_Sizes):
     with open(MagicBlast_File) as Input:
         for line in Input:
             line = line.strip().split()
-            if "VIRSorter" in line[1]:
+            if "VC_" in line[1]:
                 Genome = line[1]
             else:
                 Genome = line[1].split("_")
