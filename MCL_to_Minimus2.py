@@ -73,7 +73,9 @@ def Minimus2(Cluster_list):
 
     for Cluster in Cluster_list:
         toAmos_File = Cluster.with_suffix('.afg') # Output for script toAmos
+        Prefix = Cluster.with_suffix('') # Input prefix for Minimus2
         subprocess.Popen(["toAmos", "-s", Cluster, "-o", toAmos_File], stdout=subprocess.PIPE)
+        subprocess.Popen(["minimus2", Prefix], stdout=subprocess.PIPE)
     with open("{}_Cluster_Rep.fasta".format(Output_Prefix), 'w') as Output:
         for cluster, genomes in Cluster_Dict.items():
             Sizes = []
@@ -129,7 +131,7 @@ def main():
     Contig_Folder = args.Contig_Folder
 
     Cluster_List = MCL_to_List(MCL_File, Output_Folder, Contig_Folder)
-    Cluster_to_Alignment(Cluster_List)
+    Minimus2(Cluster_List)
 
 if __name__ == "__main__":
     main()
