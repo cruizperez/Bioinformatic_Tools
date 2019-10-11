@@ -63,6 +63,7 @@ def MCL_to_List(MCL_Output, Output_Folder=None, Contig_Folder=None):
 
     print("There were {} clusters".format(Cluster))
     print("There were {} unclustered contigs.".format(Unclustered_Contigs))
+
     return Cluster_List
 
     # ------------------------
@@ -72,10 +73,21 @@ def Minimus2(Cluster_list):
     import subprocess
 
     for Cluster in Cluster_list:
+        if Cluster.with_suffix(".out").exists():
+            print("{} already processed".format(Cluster))
+            continue
         toAmos_File = Cluster.with_suffix('.afg') # Output for script toAmos
         Prefix = Cluster.with_suffix('') # Input prefix for Minimus2
-        subprocess.Popen(["toAmos", "-s", Cluster, "-o", toAmos_File], stdout=subprocess.PIPE)
-        #subprocess.Popen(["minimus2", Prefix], stdout=subprocess.PIPE)
+        toAmos = subprocess.Popen(["toAmos", "-s", Cluster, "-o", toAmos_File], stdout=subprocess.PIPE)
+        toAmos.wait()
+        try:
+            Minimus = subprocess.check_call(["minimus2", Prefix, "-D", "OVERLAP=1000", "-D", "MINID=95"])
+        except:
+            print("------ WARNING -------")
+            print(Minimus)
+        if Minimus == 0:
+           Done = Cluster.with_suffix(".out")
+           Done.touch(exist_ok=True)
 
 ################################################################################
 """---2.0 Main Function---"""
@@ -93,18 +105,24 @@ def main():
     parser.add_argument('-m', '--mclFile', dest='MCL_File', action='store', required=True, help='Input MCL file.')
     parser.add_argument('-o', '--outfolder', dest='Output_Folder', action='store', required=True, help='Prefix of output files.')
     parser.add_argument('-c', '--contigfolder', dest='Contig_Folder', action='store', required=True, help='Prefix of output files.')
-    parser.add_argument('-e', '--extension', dest='Extension', action='store', required=True, help='Extension of contig files')
-    parser.add_argument('-d', '--directory', dest='ContigDir', action='store', required=True, help='Directory where contigs are located.')
+    parser.add_argument('--step', dest="Step", action='store', required=False, default=1, type=int, 
+                        help='Step to perform; 1 start from scratch, 2 start from minimus2.')
     args = parser.parse_args()
 
     MCL_File = args.MCL_File
     Output_Folder = args.Output_Folder
-    Extension = args.Extension
-    ContigDir = args.ContigDir
     Contig_Folder = args.Contig_Folder
+    Step = args.Step
 
-    Cluster_List = MCL_to_List(MCL_File, Output_Folder, Contig_Folder)
-    Minimus2(Cluster_List)
+    if Step == 1:
+        Cluster_List = MCL_to_List(MCL_File, Output_Folder, Contig_Folder)
+        Minimus2(Cluster_List)
+    else:
+        import pathlib as pl
+        Output_Folder = pl.Path(Output_Folder)
+        Folders = [f for f in Output_Folder.iterdir() if f.is_dir()]
+        Files = [f.joinpath(f.name + '.genomes') for f in Folders]
+        Minimus2(Files)
 
 if __name__ == "__main__":
     main()
