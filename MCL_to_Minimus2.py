@@ -81,7 +81,7 @@ def Minimus2(Cluster_list):
         toAmos = subprocess.Popen(["toAmos", "-s", Cluster, "-o", toAmos_File], stdout=subprocess.PIPE)
         toAmos.wait()
         try:
-            Minimus = subprocess.check_call(["minimus2", Prefix, "-D", "OVERLAP=1000", "-D", "MINID=95"])
+            Minimus = subprocess.check_call(["minimus2", Prefix, "-D", "OVERLAP=2000", "-D", "MINID=95"])
         except:
             print("------ WARNING -------")
             print(Minimus)
