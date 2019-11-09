@@ -31,7 +31,7 @@ def Get_FastA_FromID(TaxID_List, History, Output, email, API = None):
         end = min(Count, start+Batch_Size)
         print("Going to download fasta record {} to {}".format(start+1, end))
         try:
-            fetch_handle = Entrez.efetch(db="nuccore", rettype="fasta", idtype="acc", #retmode="text",
+            fetch_handle = Entrez.efetch(db="genome", rettype="fasta", idtype="acc", #retmode="text",
                         retstart=start, retmax=Batch_Size,
                         webenv=History[0], query_key=History[1])
             data = fetch_handle.read()
@@ -53,7 +53,7 @@ def main():
             '''Usage: ''' + sys.argv[0] + ''' -l [List of IDs] or -f [File w IDs] -e [Email to tell NCBI who you are. IMPORTANT] -o [Output_Table (For list)] -a [API Key obtained from NCBI]\n'''
             '''Global mandatory parameters: -e [Email]\n'''
             '''Optional Database Parameters: See ''' + sys.argv[0] + ' -h')
-    parser.add_argument('-l', '--list', dest='ID_List', action='store', required=False, help='Comma-separated list IDs, e.g., ID1,ID2,ID3...')
+    parser.add_argument('-l', '--list', dest='ID_List', action='store', nargs='+', required=False, help='Comma-separated list IDs, e.g., ID1,ID2,ID3...')
     parser.add_argument('-f', '--fileID', dest='ID_File', action='store', required=False, help='File with IDs to search, one per line')
     parser.add_argument('-o', '--output', dest='Output_File', action='store', required=True, help='File to store all fasta sequences returned')
     parser.add_argument('-e', '--email', dest='Email', action='store', required=True, help='Email to tell NCBI who you are.')
@@ -67,18 +67,19 @@ def main():
     API = args.API.lower()
 
     #Parse input IDs
-    Input_ID_List = []
+    print(ID_List)
     if ID_File == None and ID_List == None:
         print("No IDs provided. Please give a list of IDs with -l or a file containing the IDs one per line with -f.")
     elif ID_File != None:
+        Input_ID_List = []
         with open(ID_File) as Input_File:
             for line in Input_File:
                 line = line.strip().split()[0]
                 Input_ID_List.append(line)
     elif ID_List != None:
-        Input_ID_List = ID_List.split(",")
+        Input_ID_List = ID_List
 
-    Entry_History = Post_IDs(Input_ID_List, "nuccore", Email, API)
+    Entry_History = Post_IDs(Input_ID_List, "assembly", Email, API)
 
     Get_FastA_FromID(Input_ID_List, Entry_History, Output_File, Email, API)
 
