@@ -11,7 +11,7 @@ def FastA_Filter_List(FastaFile, Output, List, Reverse=False):
     else:
         import pandas as pd
         List_DF = pd.read_csv(List, delim_whitespace=True)
-        Seq_ID_list = df[0].tolist()
+        Seq_ID_list = List_DF[0].tolist()
     Records = len(Seq_ID_list)
     with open(FastaFile) as Fasta_in, open(Output, 'w') as Fasta_out:
         if Reverse == True:
