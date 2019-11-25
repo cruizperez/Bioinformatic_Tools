@@ -39,7 +39,10 @@ def run_hmmsearch(InputFile):
     Folder = FilePath.parent
     Output = Folder / Prefix.with_suffix('.hmm')
     Temp_Output = Folder / Prefix.with_suffix('.temp')
-    subprocess.call(["hmmsearch", "--tblout", str(Output), "-o", str(Temp_Output), "--cut_ga", "--cpu", "1", "/mnt/c/Users/Cruiz/OneDrive/Escritorio/kAAI/Multiprocess_Test/00.HMM_Models/genes.hmm", str(FilePath)])
+    Script_path = Path(__file__)
+    Script_dir = Script_path.parent
+    HMM_Model = Script_dir / "00.Libraries/01.SCG_HMMs/Complete_SCG_DB.hmm"
+    subprocess.call(["hmmsearch", "--tblout", str(Output), "-o", str(Temp_Output), "--cut_ga", "--cpu", "1", str(HMM_Model), str(FilePath)])
     Temp_Output.unlink()
     return Output
 
@@ -63,6 +66,16 @@ def read_kmers_from_file(filename, positive_hits, ksize):
             if title.split()[0] in positive_hits:
                 kmers = build_kmers(sequence, ksize)
                 all_kmers += kmers
+    return all_kmers
+
+# --- Read Kmers from files ---
+def read_total_kmers_from_file(filename, positive_hits, ksize):
+    from Bio.SeqIO.FastaIO import SimpleFastaParser
+    all_kmers = []
+    with open(filename) as Fasta_in:
+        for title, sequence in SimpleFastaParser(Fasta_in):
+            kmers = build_kmers(sequence, ksize)
+            all_kmers += kmers
     return all_kmers
 
 # --- Parse kAAI ---
@@ -131,7 +144,6 @@ def main():
     from functools import partial
     import datetime
     import shutil
-    from sys import getsizeof
 
     # Setup parser for arguments.
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
@@ -188,7 +200,6 @@ def main():
         pool.join()
 
     Final_Kmer_Dict = merge_dicts(Kmer_Results)
-    print(getsizeof(Final_Kmer_Dict))
     print(datetime.datetime.now()) # Remove after testing
 
     # Calculate shared Kmer fraction
