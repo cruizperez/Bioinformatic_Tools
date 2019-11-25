@@ -67,8 +67,7 @@ def kAAI_Parser(ID, Kmer_Dictionary):
     FilePath = Path(ID)
     Folder = Path.cwd()
     Output = Folder / FilePath.with_suffix('.aai.temp')
-    with open(Output, 'a') as OutFile:
-        # for ID in ID_List:
+    with open(Output, 'w') as OutFile:
         for key2, value2 in Kmer_Dictionary.items():
             intersection = len(set(Kmer_Dictionary[ID]).intersection(set(value2)))
             shorter = min(len(list(set(Kmer_Dictionary[ID]))), len(list(set(value2))))
@@ -179,24 +178,45 @@ def main():
     Final_Kmer_Dict = merge_dicts(Kmer_Results)
     print(datetime.datetime.now()) # Remove after testing
 
+    # # Calculate shared Kmer fraction
+    # print(datetime.datetime.now()) # Remove after testing
+    # print("Calculating shared Kmer fraction...")
+    # ID_List = Final_Kmer_Dict.keys()
+    # try:
+    #     pool = pool = multiprocessing.Pool(Threads)
+    #     Fraction_Results = pool.map(partial(kAAI_Parser, Kmer_Dictionary=Final_Kmer_Dict), ID_List)
+    # finally:
+    #     pool.close()
+    #     pool.join()
+    # print(datetime.datetime.now()) # Remove after testing
+
     # Calculate shared Kmer fraction
     print(datetime.datetime.now()) # Remove after testing
+    Fraction_Results = []
     print("Calculating shared Kmer fraction...")
     ID_List = Final_Kmer_Dict.keys()
-    try:
-        pool = pool = multiprocessing.Pool(Threads)
-        Fraction_Results = pool.map(partial(kAAI_Parser, Kmer_Dictionary=Final_Kmer_Dict), ID_List)
-    finally:
-        pool.close()
-        pool.join()
+    with open(Output, 'w') as OutFile:
+        Copied_Dict = Final_Kmer_Dict.copy()
+        for ID in ID_List:
+            FilePath = Path(ID)
+            Folder = Path.cwd()
+            Output = Folder / FilePath.with_suffix('.aai.temp')
+            Fraction_Results.append(Output)
+            for key2, value2 in Copied_Dict.items():
+                intersection = len(set(Copied_Dict[ID]).intersection(set(value2)))
+                shorter = min(len(list(set(Copied_Dict[ID]))), len(list(set(value2))))
+                fraction = round(intersection/shorter, 3)
+                OutFile.write("{}\t{}\t{}\t{}\t{}\n".format(ID, key2, intersection, shorter, fraction))
+            del Copied_Dict[ID]
+
     print(datetime.datetime.now()) # Remove after testing
 
     # Merge results into a single output
-    with open(Output, 'w') as OutFile:
-        for file in Fraction_Results:
-            with open(file) as Temp:
-                shutil.copyfileobj(Temp, OutFile)
-            file.unlink()
+    # with open(Output, 'w') as OutFile:
+    #     for file in Fraction_Results:
+    #         with open(file) as Temp:
+    #             shutil.copyfileobj(Temp, OutFile)
+    #         file.unlink()
 
 
 if __name__ == "__main__":
