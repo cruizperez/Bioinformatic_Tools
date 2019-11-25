@@ -15,6 +15,7 @@ each genome and SCG found in it.
 
 ################################################################################
 """---1.0 Define Functions---"""
+# --- Run prodigal ---
 def run_prodigal(InputFile):
     import subprocess
     from pathlib import Path
@@ -28,6 +29,7 @@ def run_prodigal(InputFile):
     Temp_Output.unlink()
     return Output
 
+# --- Run hmmsearch ---
 def run_hmmsearch(InputFile):
     import subprocess
     from pathlib import Path
@@ -41,6 +43,7 @@ def run_hmmsearch(InputFile):
     Temp_Output.unlink()
     return Output
 
+# --- Build Kmers ---
 def build_kmers(sequence, ksize):
     kmers = []
     n_kmers = len(sequence) - ksize + 1
@@ -51,6 +54,7 @@ def build_kmers(sequence, ksize):
 
     return kmers
 
+# --- Read Kmers from files ---
 def read_kmers_from_file(filename, positive_hits, ksize):
     from Bio.SeqIO.FastaIO import SimpleFastaParser
     all_kmers = []
@@ -61,7 +65,8 @@ def read_kmers_from_file(filename, positive_hits, ksize):
                 all_kmers += kmers
     return all_kmers
 
-def kAAI_Parser(ID, Kmer_Dictionary):
+# --- Parse kAAI ---
+def kAAI_Parser(ID):
     from pathlib import Path
 
     FilePath = Path(ID)
@@ -74,6 +79,12 @@ def kAAI_Parser(ID, Kmer_Dictionary):
             fraction = round(intersection/shorter, 3)
             OutFile.write("{}\t{}\t{}\t{}\t{}\n".format(ID, key2, intersection, shorter, fraction))
     return Output
+
+# --- Initialize function ---
+def child_initialize(_dictionary):
+     global Kmer_Dictionary
+     Kmer_Dictionary = _dictionary
+
 
 def Kmer_Parser(SCG_file):
     from pathlib import Path
@@ -120,6 +131,7 @@ def main():
     from functools import partial
     import datetime
     import shutil
+    from sys import getsizeof
 
     # Setup parser for arguments.
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
@@ -169,13 +181,14 @@ def main():
     # Parse HMM results
     print("Parsing HMM results...")
     try:
-        pool = pool = multiprocessing.Pool(Threads)
+        pool = multiprocessing.Pool(Threads)
         Kmer_Results = pool.map(Kmer_Parser, Protein_Files)
     finally:
         pool.close()
         pool.join()
 
     Final_Kmer_Dict = merge_dicts(Kmer_Results)
+    print(getsizeof(Final_Kmer_Dict))
     print(datetime.datetime.now()) # Remove after testing
 
     # Calculate shared Kmer fraction
@@ -183,35 +196,15 @@ def main():
     print("Calculating shared Kmer fraction...")
     ID_List = Final_Kmer_Dict.keys()
     try:
-        pool = pool = multiprocessing.Pool(Threads)
-        Fraction_Results = pool.map(partial(kAAI_Parser, Kmer_Dictionary=Final_Kmer_Dict.copy()), ID_List)
+        pool = multiprocessing.Pool(Threads, initializer = child_initialize, initargs = (Final_Kmer_Dict,))
+        Fraction_Results = pool.map(kAAI_Parser, ID_List)
+        # Fraction_Results = pool.map(partial(kAAI_Parser, Kmer_Dictionary=Final_Kmer_Dict.copy()), ID_List)
     finally:
         pool.close()
         pool.join()
     print(datetime.datetime.now()) # Remove after testing
 
-    # Calculate shared Kmer fraction
-    # print(datetime.datetime.now()) # Remove after testing
-    # Fraction_Results = []
-    # print("Calculating shared Kmer fraction...")
-    # ID_List = Final_Kmer_Dict.keys()
-    # with open(Output, 'w') as OutFile:
-    #     Copied_Dict = Final_Kmer_Dict.copy()
-    #     for ID in ID_List:
-    #         FilePath = Path(ID)
-    #         Folder = Path.cwd()
-    #         Output = Folder / FilePath.with_suffix('.aai.temp')
-    #         Fraction_Results.append(Output)
-    #         for key2, value2 in Copied_Dict.items():
-    #             intersection = len(set(Copied_Dict[ID]).intersection(set(value2)))
-    #             shorter = min(len(list(set(Copied_Dict[ID]))), len(list(set(value2))))
-    #             fraction = round(intersection/shorter, 3)
-    #             OutFile.write("{}\t{}\t{}\t{}\t{}\n".format(ID, key2, intersection, shorter, fraction))
-    #         del Copied_Dict[ID]
-
-    print(datetime.datetime.now()) # Remove after testing
-
-    # Merge results into a single output
+     # Merge results into a single output
     with open(Output, 'w') as OutFile:
         for file in Fraction_Results:
             with open(file) as Temp:
