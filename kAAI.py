@@ -61,8 +61,13 @@ def read_kmers_from_file(filename, positive_hits, ksize):
                 all_kmers += kmers
     return all_kmers
 
-def kAAI_Parser(ID, Kmer_Dictionary, OutFile):
-    with open(OutFile, 'a') as OutFile:
+def kAAI_Parser(ID, Kmer_Dictionary):
+    from pathlib import Path
+
+    FilePath = Path(ID)
+    Folder = Path.cwd()
+    Output = Folder / FilePath.with_suffix('.aai.temp')
+    with open(Output, 'a') as OutFile:
         # for ID in ID_List:
         for key2, value2 in Kmer_Dictionary.items():
             intersection = len(set(Kmer_Dictionary[ID]).intersection(set(value2)))
@@ -81,6 +86,8 @@ def main():
     import subprocess
     import multiprocessing
     from functools import partial
+    import datetime
+    import shutil
 
     # Setup parser for arguments.
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
@@ -101,6 +108,7 @@ def main():
     Output = args.Output
     Threads = args.Threads
 
+    print(datetime.datetime.now()) # Remove after testing
     if Genome_List != None:
         print("Predicting proteins...")
         Protein_Files = []
@@ -114,15 +122,19 @@ def main():
             HMM_Search_Files.append(HMM_Result)
     elif Protein_Files != None:
         print("Searching HMM models...")
-        number_processes = Threads
-        pool = multiprocessing.Pool(number_processes)
-        HMM_Search_Files = pool.map(run_hmmsearch, Protein_Files)
-        pool.close()
-        pool.join()
+        try:
+            pool = multiprocessing.Pool(Threads)
+            HMM_Search_Files = pool.map(run_hmmsearch, Protein_Files)
+        finally:
+            pool.close()
+            pool.join()
     else:
         exit('No input provided, please provide either genomes "-g" or protein files "-p"')
+    print(datetime.datetime.now()) # Remove after testing
 
+    print(datetime.datetime.now()) # Remove after testing
     Kmer_Dic = {}
+    print("Parsing HMM results...")
     for SCG_file in Protein_Files:
         Protein_Path = Path(SCG_file)
         Prefix = Path(Protein_Path.stem)
@@ -139,14 +151,25 @@ def main():
         HMM_File.unlink()
         kmers = read_kmers_from_file(SCG_file, Positive_Matches, 8)
         Kmer_Dic[Name] = kmers
-    
+    print(datetime.datetime.now()) # Remove after testing
+
+    print(datetime.datetime.now()) # Remove after testing
+    print("Calculating shared Kmer fraction...")
     ID_List = Kmer_Dic.keys()
     try:
-        pool = pool = multiprocessing.Pool(number_processes)
-        pool.map(partial(kAAI_Parser, Kmer_Dictionary=Kmer_Dic, OutFile=Output), ID_List)
+        pool = pool = multiprocessing.Pool(Threads)
+        Fraction_Results = pool.map(partial(kAAI_Parser, Kmer_Dictionary=Kmer_Dic), ID_List)
     finally:
         pool.close()
         pool.join()
+    print(datetime.datetime.now()) # Remove after testing
+
+    with open(Output, 'w') as OutFile:
+        for file in Fraction_Results:
+            with open(file, 'rb') as Temp:
+                shutil.copyfileobj(Temp, OutFile)
+            file.unlink()
+
 
 if __name__ == "__main__":
     main()
