@@ -69,8 +69,8 @@ def kAAI_Parser(ID, Kmer_Dictionary):
     Output = Folder / FilePath.with_suffix('.aai.temp')
     with open(Output, 'w') as OutFile:
         for key2, value2 in Kmer_Dictionary.items():
-            intersection = len(set(Kmer_Dictionary[ID]).intersection(set(value2)))
-            shorter = min(len(list(set(Kmer_Dictionary[ID]))), len(list(set(value2))))
+            intersection = len(Kmer_Dictionary[ID].intersection(value2))
+            shorter = min(len(list(Kmer_Dictionary[ID])), len(list(value2)))
             fraction = round(intersection/shorter, 3)
             OutFile.write("{}\t{}\t{}\t{}\t{}\n".format(ID, key2, intersection, shorter, fraction))
     return Output
@@ -93,7 +93,7 @@ def Kmer_Parser(SCG_file):
                 Positive_Matches.append(line.strip().split()[0])
     HMM_File.unlink()
     kmers = read_kmers_from_file(SCG_file, Positive_Matches, 8)
-    Kmer_Dic[Name] = kmers
+    Kmer_Dic[Name] = set(kmers)
 
     return Kmer_Dic
 
@@ -178,45 +178,45 @@ def main():
     Final_Kmer_Dict = merge_dicts(Kmer_Results)
     print(datetime.datetime.now()) # Remove after testing
 
-    # # Calculate shared Kmer fraction
-    # print(datetime.datetime.now()) # Remove after testing
-    # print("Calculating shared Kmer fraction...")
-    # ID_List = Final_Kmer_Dict.keys()
-    # try:
-    #     pool = pool = multiprocessing.Pool(Threads)
-    #     Fraction_Results = pool.map(partial(kAAI_Parser, Kmer_Dictionary=Final_Kmer_Dict), ID_List)
-    # finally:
-    #     pool.close()
-    #     pool.join()
-    # print(datetime.datetime.now()) # Remove after testing
-
     # Calculate shared Kmer fraction
     print(datetime.datetime.now()) # Remove after testing
-    Fraction_Results = []
     print("Calculating shared Kmer fraction...")
     ID_List = Final_Kmer_Dict.keys()
-    with open(Output, 'w') as OutFile:
-        Copied_Dict = Final_Kmer_Dict.copy()
-        for ID in ID_List:
-            FilePath = Path(ID)
-            Folder = Path.cwd()
-            Output = Folder / FilePath.with_suffix('.aai.temp')
-            Fraction_Results.append(Output)
-            for key2, value2 in Copied_Dict.items():
-                intersection = len(set(Copied_Dict[ID]).intersection(set(value2)))
-                shorter = min(len(list(set(Copied_Dict[ID]))), len(list(set(value2))))
-                fraction = round(intersection/shorter, 3)
-                OutFile.write("{}\t{}\t{}\t{}\t{}\n".format(ID, key2, intersection, shorter, fraction))
-            del Copied_Dict[ID]
+    try:
+        pool = pool = multiprocessing.Pool(Threads)
+        Fraction_Results = pool.map(partial(kAAI_Parser, Kmer_Dictionary=Final_Kmer_Dict.copy()), ID_List)
+    finally:
+        pool.close()
+        pool.join()
+    print(datetime.datetime.now()) # Remove after testing
+
+    # Calculate shared Kmer fraction
+    # print(datetime.datetime.now()) # Remove after testing
+    # Fraction_Results = []
+    # print("Calculating shared Kmer fraction...")
+    # ID_List = Final_Kmer_Dict.keys()
+    # with open(Output, 'w') as OutFile:
+    #     Copied_Dict = Final_Kmer_Dict.copy()
+    #     for ID in ID_List:
+    #         FilePath = Path(ID)
+    #         Folder = Path.cwd()
+    #         Output = Folder / FilePath.with_suffix('.aai.temp')
+    #         Fraction_Results.append(Output)
+    #         for key2, value2 in Copied_Dict.items():
+    #             intersection = len(set(Copied_Dict[ID]).intersection(set(value2)))
+    #             shorter = min(len(list(set(Copied_Dict[ID]))), len(list(set(value2))))
+    #             fraction = round(intersection/shorter, 3)
+    #             OutFile.write("{}\t{}\t{}\t{}\t{}\n".format(ID, key2, intersection, shorter, fraction))
+    #         del Copied_Dict[ID]
 
     print(datetime.datetime.now()) # Remove after testing
 
     # Merge results into a single output
-    # with open(Output, 'w') as OutFile:
-    #     for file in Fraction_Results:
-    #         with open(file) as Temp:
-    #             shutil.copyfileobj(Temp, OutFile)
-    #         file.unlink()
+    with open(Output, 'w') as OutFile:
+        for file in Fraction_Results:
+            with open(file) as Temp:
+                shutil.copyfileobj(Temp, OutFile)
+            file.unlink()
 
 
 if __name__ == "__main__":
