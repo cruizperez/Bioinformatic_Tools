@@ -74,6 +74,39 @@ def kAAI_Parser(ID, Kmer_Dictionary):
             shorter = min(len(list(set(Kmer_Dictionary[ID]))), len(list(set(value2))))
             fraction = round(intersection/shorter, 3)
             OutFile.write("{}\t{}\t{}\t{}\t{}\n".format(ID, key2, intersection, shorter, fraction))
+    return Output
+
+def Kmer_Parser(SCG_file):
+    from pathlib import Path
+
+    Kmer_Dic = {}
+    Protein_Path = Path(SCG_file)
+    Prefix = Path(Protein_Path.stem)
+    Name = Protein_Path.name
+    Folder = Protein_Path.parent
+    HMM_File = Folder / Prefix.with_suffix('.hmm')
+    Positive_Matches = []
+    with open(HMM_File, 'r') as HMM_Input:
+        for line in HMM_Input:
+            if line.startswith("#"):
+                continue
+            else:
+                Positive_Matches.append(line.strip().split()[0])
+    HMM_File.unlink()
+    kmers = read_kmers_from_file(SCG_file, Positive_Matches, 8)
+    Kmer_Dic[Name] = kmers
+
+    return Kmer_Dic
+
+def merge_dicts(Dictionaries):
+    """
+    Given any number of dicts, shallow copy and merge into a new dict,
+    precedence goes to key value pairs in latter dicts.
+    """
+    result = {}
+    for dictionary in Dictionaries:
+        result.update(dictionary)
+    return result
 
 ################################################################################
 """---2.0 Main Function---"""
@@ -133,40 +166,35 @@ def main():
     print(datetime.datetime.now()) # Remove after testing
 
     print(datetime.datetime.now()) # Remove after testing
-    Kmer_Dic = {}
+    
+    # Parse HMM results
     print("Parsing HMM results...")
-    for SCG_file in Protein_Files:
-        Protein_Path = Path(SCG_file)
-        Prefix = Path(Protein_Path.stem)
-        Name = Protein_Path.name
-        Folder = Protein_Path.parent
-        HMM_File = Folder / Prefix.with_suffix('.hmm')
-        Positive_Matches = []
-        with open(HMM_File, 'r') as HMM_Input:
-            for line in HMM_Input:
-                if line.startswith("#"):
-                    continue
-                else:
-                    Positive_Matches.append(line.strip().split()[0])
-        HMM_File.unlink()
-        kmers = read_kmers_from_file(SCG_file, Positive_Matches, 8)
-        Kmer_Dic[Name] = kmers
-    print(datetime.datetime.now()) # Remove after testing
-
-    print(datetime.datetime.now()) # Remove after testing
-    print("Calculating shared Kmer fraction...")
-    ID_List = Kmer_Dic.keys()
     try:
         pool = pool = multiprocessing.Pool(Threads)
-        Fraction_Results = pool.map(partial(kAAI_Parser, Kmer_Dictionary=Kmer_Dic), ID_List)
+        Kmer_Results = pool.map(Kmer_Parser, Protein_Files)
+    finally:
+        pool.close()
+        pool.join()
+
+    Final_Kmer_Dict = merge_dicts(Kmer_Results)
+    print(datetime.datetime.now()) # Remove after testing
+
+    # Calculate shared Kmer fraction
+    print(datetime.datetime.now()) # Remove after testing
+    print("Calculating shared Kmer fraction...")
+    ID_List = Final_Kmer_Dict.keys()
+    try:
+        pool = pool = multiprocessing.Pool(Threads)
+        Fraction_Results = pool.map(partial(kAAI_Parser, Kmer_Dictionary=Final_Kmer_Dict), ID_List)
     finally:
         pool.close()
         pool.join()
     print(datetime.datetime.now()) # Remove after testing
 
+    # Merge results into a single output
     with open(Output, 'w') as OutFile:
         for file in Fraction_Results:
-            with open(file, 'rb') as Temp:
+            with open(file) as Temp:
                 shutil.copyfileobj(Temp, OutFile)
             file.unlink()
 
