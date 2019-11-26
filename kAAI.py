@@ -157,7 +157,7 @@ def main():
     parser.add_argument('-s', '--scg_hmm', dest='HMM_Files', action='store', nargs='+', required=False, help='List of hmm search results')
     parser.add_argument('-o', '--output', dest='Output', action='store', required=True, help='Output File')
     parser.add_argument('-t', '--threads', dest='Threads', action='store', default=1, type=int, required=False, help='Number of threads to use, by default 1')
-    parser.add_argument('-k', '--keep', dest='Keep', action='store_true', required=False, help='Keep intermediate files, by default false')
+    parser.add_argument('-k', '--keep', dest='Keep', action='store_false', required=False, help='Keep intermediate files, by default false')
     args = parser.parse_args()
 
     Genome_List = args.Genome_List
