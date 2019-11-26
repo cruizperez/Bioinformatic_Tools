@@ -46,7 +46,7 @@ def run_hmmsearch(InputFile):
         pass
     else:
         subprocess.call(["hmmsearch", "--tblout", str(Output), "-o", str(Temp_Output), "--cut_ga", "--cpu", "1", str(HMM_Model), str(FilePath)])
-    Temp_Output.unlink()
+        Temp_Output.unlink()
     return Output
 
 # --- Build Kmers ---
