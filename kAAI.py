@@ -35,19 +35,38 @@ def run_hmmsearch(InputFile):
     from pathlib import Path
 
     FilePath = Path(InputFile)
-    Prefix = Path(FilePath.stem)
     Folder = FilePath.parent
-    Output = Folder / Prefix.with_suffix('.hmm')
-    Temp_Output = Folder / Prefix.with_suffix('.temp')
+    Output = Folder / FilePath.with_suffix('.hmm')
+    Temp_Output = Folder / FilePath.with_suffix('.temp')
     Script_path = Path(__file__)
     Script_dir = Script_path.parent
     HMM_Model = Script_dir / "00.Libraries/01.SCG_HMMs/Complete_SCG_DB.hmm"
-    if Output.exists():
-        pass
-    else:
-        subprocess.call(["hmmsearch", "--tblout", str(Output), "-o", str(Temp_Output), "--cut_ga", "--cpu", "1", str(HMM_Model), str(FilePath)])
-        Temp_Output.unlink()
+    subprocess.call(["hmmsearch", "--tblout", str(Output), "-o", str(Temp_Output), "--cut_ga", "--cpu", "1", str(HMM_Model), str(FilePath)])
+    Temp_Output.unlink()
     return Output
+
+# --- Find Kmers from HMM results ---
+def Kmer_Parser(SCG_HMM_file, Keep):
+    from pathlib import Path
+
+    Kmer_Dic = {}
+    HMM_Path = Path(SCG_HMM_file)
+    Name = HMM_Path.name
+    Folder = HMM_Path.parent
+    Protein_File = Folder / HMM_Path.with_suffix('.faa')
+    Positive_Matches = []
+    with open(HMM_Path, 'r') as HMM_Input:
+        for line in HMM_Input:
+            if line.startswith("#"):
+                continue
+            else:
+                Positive_Matches.append(line.strip().split()[0])
+    if Keep == False:
+        HMM_Path.unlink()
+    kmers = read_kmers_from_file(Protein_File, Positive_Matches, 8)
+    Kmer_Dic[Name] = set(kmers)
+
+    return Kmer_Dic
 
 # --- Build Kmers ---
 def build_kmers(sequence, ksize):
@@ -60,7 +79,7 @@ def build_kmers(sequence, ksize):
 
     return kmers
 
-# --- Read Kmers from files ---
+# --- Read Kmers from SCGs ---
 def read_kmers_from_file(filename, positive_hits, ksize):
     from Bio.SeqIO.FastaIO import SimpleFastaParser
     all_kmers = []
@@ -101,29 +120,6 @@ def child_initialize(_dictionary):
      global Kmer_Dictionary
      Kmer_Dictionary = _dictionary
 
-
-def Kmer_Parser(SCG_file):
-    from pathlib import Path
-
-    Kmer_Dic = {}
-    Protein_Path = Path(SCG_file)
-    Prefix = Path(Protein_Path.stem)
-    Name = Protein_Path.name
-    Folder = Protein_Path.parent
-    HMM_File = Folder / Prefix.with_suffix('.hmm')
-    Positive_Matches = []
-    with open(HMM_File, 'r') as HMM_Input:
-        for line in HMM_Input:
-            if line.startswith("#"):
-                continue
-            else:
-                Positive_Matches.append(line.strip().split()[0])
-    HMM_File.unlink()
-    kmers = read_kmers_from_file(SCG_file, Positive_Matches, 8)
-    Kmer_Dic[Name] = set(kmers)
-
-    return Kmer_Dic
-
 def merge_dicts(Dictionaries):
     """
     Given any number of dicts, shallow copy and merge into a new dict,
@@ -156,19 +152,25 @@ def main():
             '''Usage: ''' + argv[0] + ''' -i [CheckM Output] -l [SCG list] -o [Gene Copy Matrix]\n'''
             '''Global mandatory parameters: -i [CheckM Output] -l [SCG list] -o [Gene Copy Matrix]\n'''
             '''Optional Database Parameters: See ''' + argv[0] + ' -h')
-    parser.add_argument('-g', '--genomes', dest='Genome_List', action='store', nargs='+', required=False, help='List of input genomes')
+    parser.add_argument('-g', '--genomes', dest='Genome_List', action='store', nargs='+', required=False, help='List of input genomes. Implies step 1')
     parser.add_argument('-p', '--proteins', dest='Protein_Files', action='store', nargs='+', required=False, help='List of input protein files')
+    parser.add_argument('-s', '--scg_hmm', dest='HMM_Files', action='store', nargs='+', required=False, help='List of hmm search results')
     parser.add_argument('-o', '--output', dest='Output', action='store', required=True, help='Output File')
     parser.add_argument('-t', '--threads', dest='Threads', action='store', default=1, type=int, required=False, help='Number of threads to use, by default 1')
+    parser.add_argument('-k', '--keep', dest='Keep', action='store_true', required=False, help='Keep intermediate files, by default false')
     args = parser.parse_args()
 
     Genome_List = args.Genome_List
     Protein_Files = args.Protein_Files
+    HMM_Files = args.HMM_Files
     Output = args.Output
     Threads = args.Threads
+    Keep = args.Keep
 
+    # Predict proteins and perform HMM searches
     print(datetime.datetime.now()) # Remove after testing
     if Genome_List != None:
+        print("Starting from Genomes...")
         print("Predicting proteins...")
         Protein_Files = []
         HMM_Search_Files = []
@@ -176,10 +178,14 @@ def main():
             Proteins = run_prodigal(Genome)
             Protein_Files.append(Proteins)
         print("Searching HMM models...")
-        for Proteins in Protein_Files:
-            HMM_Result = run_hmmsearch(Proteins)
-            HMM_Search_Files.append(HMM_Result)
+        try:
+            pool = multiprocessing.Pool(Threads)
+            HMM_Search_Files = pool.map(run_hmmsearch, Protein_Files)
+        finally:
+            pool.close()
+            pool.join()
     elif Protein_Files != None:
+        print("Starting from Proteins...")
         print("Searching HMM models...")
         try:
             pool = multiprocessing.Pool(Threads)
@@ -187,38 +193,38 @@ def main():
         finally:
             pool.close()
             pool.join()
+    elif HMM_Files != None:
+        print("Starting from HMM searches...")
     else:
-        exit('No input provided, please provide either genomes "-g" or protein files "-p"')
-    print(datetime.datetime.now()) # Remove after testing
+        exit('No input provided, please provide genomes "-g", protein "-p", or scg hmm searches "-s"')
+    # ---------------------------------------------------------------
 
-    print(datetime.datetime.now()) # Remove after testing
-    
-    # Parse HMM results
+
+    # Parse HMM results, calculate distances and compile results
     print("Parsing HMM results...")
+    print(datetime.datetime.now()) # Remove after testing
     try:
         pool = multiprocessing.Pool(Threads)
-        Kmer_Results = pool.map(Kmer_Parser, Protein_Files)
+        Kmer_Results = pool.map(partial(Kmer_Parser, Keep=Keep), HMM_Search_Files)
     finally:
         pool.close()
         pool.join()
 
     Final_Kmer_Dict = merge_dicts(Kmer_Results)
-    print(datetime.datetime.now()) # Remove after testing
 
     # Calculate shared Kmer fraction
-    print(datetime.datetime.now()) # Remove after testing
     print("Calculating shared Kmer fraction...")
+    print(datetime.datetime.now()) # Remove after testing
     ID_List = Final_Kmer_Dict.keys()
     try:
         pool = multiprocessing.Pool(Threads, initializer = child_initialize, initargs = (Final_Kmer_Dict,))
         Fraction_Results = pool.map(kAAI_Parser, ID_List)
-        # Fraction_Results = pool.map(partial(kAAI_Parser, Kmer_Dictionary=Final_Kmer_Dict.copy()), ID_List)
     finally:
         pool.close()
         pool.join()
-    print(datetime.datetime.now()) # Remove after testing
 
      # Merge results into a single output
+    print(datetime.datetime.now()) # Remove after testing
     with open(Output, 'w') as OutFile:
         for file in Fraction_Results:
             with open(file) as Temp:
