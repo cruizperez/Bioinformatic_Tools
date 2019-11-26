@@ -42,7 +42,10 @@ def run_hmmsearch(InputFile):
     Script_path = Path(__file__)
     Script_dir = Script_path.parent
     HMM_Model = Script_dir / "00.Libraries/01.SCG_HMMs/Complete_SCG_DB.hmm"
-    subprocess.call(["hmmsearch", "--tblout", str(Output), "-o", str(Temp_Output), "--cut_ga", "--cpu", "1", str(HMM_Model), str(FilePath)])
+    if Output.exists():
+        pass
+    else:
+        subprocess.call(["hmmsearch", "--tblout", str(Output), "-o", str(Temp_Output), "--cut_ga", "--cpu", "1", str(HMM_Model), str(FilePath)])
     Temp_Output.unlink()
     return Output
 
