@@ -5,11 +5,11 @@
 # Author:	   Carlos Ruiz
 # Intitution:   Georgia Institute of Technology
 # Version:	  1.0
-# Date:		 Oct 04 2019
+# Date:		 Nov 27 2019
 
-# Description: This script parses a CheckM "bin_stats_ext.tsv" file from
-the analyze workflow along with a list of SCGs and returns a matrix with 
-each genome and SCG found in it.
+# Description: Calculates the average amino acid identity using k-mers
+from single copy genes. It is a faster version of the regular AAI (Blast
+or Diamond) and the hAAI implemented in MiGA.
 ########################################################################
 """
 
@@ -146,18 +146,18 @@ def main():
 
     # Setup parser for arguments.
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
-            description='''This script parses a CheckM "bin_stats_ext.tsv" file from\n'''
-                        '''the analyze workflow along with a list of SCGs and returns a matrix with\n'''
-                        '''each genome and SCG found in it.\n'''
-            '''Usage: ''' + argv[0] + ''' -i [CheckM Output] -l [SCG list] -o [Gene Copy Matrix]\n'''
-            '''Global mandatory parameters: -i [CheckM Output] -l [SCG list] -o [Gene Copy Matrix]\n'''
+            description='''This script calculates the average amino acid identity using k-mers\n'''
+                        '''from single copy genes. It is a faster version of the regular AAI '''
+                        '''(Blast or Diamond) and the hAAI implemented in MiGA.'''
+            '''Usage: ''' + argv[0] + ''' -p [Protein Files] -t [Threads] -o [Output]\n'''
+            '''Global mandatory parameters: -g [Genome Files] OR -p [Protein Files] OR -s [SCG HMM Results] -o [AAI Table Output]\n'''
             '''Optional Database Parameters: See ''' + argv[0] + ' -h')
     parser.add_argument('-g', '--genomes', dest='Genome_List', action='store', nargs='+', required=False, help='List of input genomes. Implies step 1')
     parser.add_argument('-p', '--proteins', dest='Protein_Files', action='store', nargs='+', required=False, help='List of input protein files')
     parser.add_argument('-s', '--scg_hmm', dest='HMM_Files', action='store', nargs='+', required=False, help='List of hmm search results')
     parser.add_argument('-o', '--output', dest='Output', action='store', required=True, help='Output File')
     parser.add_argument('-t', '--threads', dest='Threads', action='store', default=1, type=int, required=False, help='Number of threads to use, by default 1')
-    parser.add_argument('-k', '--keep', dest='Keep', action='store_false', required=False, help='Keep intermediate files, by default false')
+    parser.add_argument('-k', '--keep', dest='Keep', action='store_false', required=False, help='Keep intermediate files, by default true')
     args = parser.parse_args()
 
     Genome_List = args.Genome_List
@@ -168,15 +168,17 @@ def main():
     Keep = args.Keep
 
     # Predict proteins and perform HMM searches
-    print(datetime.datetime.now()) # Remove after testing
+    print("kAAI started on {}".format(datetime.datetime.now())) # Remove after testing
     if Genome_List != None:
         print("Starting from Genomes...")
         print("Predicting proteins...")
         Protein_Files = []
-        HMM_Search_Files = []
-        for Genome in Genome_List:
-            Proteins = run_prodigal(Genome)
-            Protein_Files.append(Proteins)
+        try:
+            pool = multiprocessing.Pool(Threads)
+            Protein_Files = pool.map(run_prodigal, Genome_List)
+        finally:
+            pool.close()
+            pool.join()
         print("Searching HMM models...")
         try:
             pool = multiprocessing.Pool(Threads)
@@ -195,6 +197,12 @@ def main():
             pool.join()
     elif HMM_Files != None:
         print("Starting from HMM searches...")
+    elif HMM_Files != None and Protein_Files != None:
+        exit('Please provide only one input. You provided Proteins and HMM results')
+    elif HMM_Files != None and Genome_List != None:
+        exit('Please provide only one input. You provided HMM results and Genomes')
+    elif Protein_Files != None and GenGenome_List != None:
+        exit('Please provide only one input. You provided Proteins and Genomes')
     else:
         exit('No input provided, please provide genomes "-g", protein "-p", or scg hmm searches "-s"')
     # ---------------------------------------------------------------
