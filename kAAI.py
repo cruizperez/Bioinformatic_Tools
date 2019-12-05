@@ -95,7 +95,7 @@ def read_total_kmers_from_file(filename, positive_hits, ksize):
     from Bio.SeqIO.FastaIO import SimpleFastaParser
     all_kmers = []
     with open(filename) as Fasta_in:
-        for title, sequence in SimpleFastaParser(Fasta_in):
+        for _, sequence in SimpleFastaParser(Fasta_in):
             kmers = build_kmers(sequence, ksize)
             all_kmers += kmers
     return all_kmers
@@ -202,7 +202,7 @@ def main():
         exit('Please provide only one input. You provided Proteins and HMM results')
     elif HMM_Files != None and Genome_List != None:
         exit('Please provide only one input. You provided HMM results and Genomes')
-    elif Protein_Files != None and GenGenome_List != None:
+    elif Protein_Files != None and Genome_List != None:
         exit('Please provide only one input. You provided Proteins and Genomes')
     else:
         exit('No input provided, please provide genomes "-g", protein "-p", or scg hmm searches "-s"')
