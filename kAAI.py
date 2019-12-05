@@ -63,7 +63,7 @@ def Kmer_Parser(SCG_HMM_file, Keep):
                 Positive_Matches.append(line.strip().split()[0])
     if Keep == False:
         HMM_Path.unlink()
-    kmers = read_kmers_from_file(Protein_File, Positive_Matches, 8)
+    kmers = read_kmers_from_file(Protein_File, Positive_Matches, 4)
     Kmer_Dic[Name] = set(kmers)
 
     return Kmer_Dic

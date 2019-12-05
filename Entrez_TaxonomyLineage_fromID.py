@@ -60,7 +60,7 @@ def Find_Taxonomy_FromID(ID_List, Database, History, email, API= None):
 # -------------------------------------------
 
 def Get_Lineage_FromTaxID(TaxID_List, History, email, API = None, Other = None):
-    Batch_Size = 2000
+    Batch_Size = 500
     Count = len(TaxID_List)
     Entrez.api_key = API
     Entrez.email = email
