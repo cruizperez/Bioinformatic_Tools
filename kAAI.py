@@ -197,6 +197,7 @@ def main():
             pool.join()
     elif HMM_Files != None:
         print("Starting from HMM searches...")
+        HMM_Search_Files = HMM_Files
     elif HMM_Files != None and Protein_Files != None:
         exit('Please provide only one input. You provided Proteins and HMM results')
     elif HMM_Files != None and Genome_List != None:
