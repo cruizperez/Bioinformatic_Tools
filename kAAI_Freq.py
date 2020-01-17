@@ -16,7 +16,6 @@ or Diamond) and the hAAI implemented in MiGA.
 ################################################################################
 """---1.0 Define Functions---"""
 # --- Run prodigal ---
-## TODO Compute proteins without * as stop codon
 def run_prodigal(InputFile):
     import subprocess
     from pathlib import Path
@@ -34,11 +33,12 @@ def run_prodigal(InputFile):
 def run_hmmsearch(InputFile):
     import subprocess
     from pathlib import Path
-## TODO Fix path usage (urgent)
+
     FilePath = Path(InputFile)
     Folder = FilePath.parent
-    Output = Folder / FilePath.with_suffix('.hmm')
-    Temp_Output = Folder / FilePath.with_suffix('.temp')
+    Name = Path(FilePath.name)
+    Output = Folder / Name.with_suffix('.hmm')
+    Temp_Output = Folder / Name.with_suffix('.temp')
     Script_path = Path(__file__)
     Script_dir = Script_path.parent
     HMM_Model = Script_dir / "00.Libraries/01.SCG_HMMs/Complete_SCG_DB.hmm"
@@ -52,9 +52,9 @@ def Kmer_Parser(SCG_HMM_file, Keep):
 
     Kmer_Dic = {}
     HMM_Path = Path(SCG_HMM_file)
-    Name = HMM_Path.name
+    Name = Path(HMM_Path.name)
     Folder = HMM_Path.parent
-    Protein_File = Folder / HMM_Path.with_suffix('.faa')
+    Protein_File = Folder / Name.with_suffix('.faa')
     Positive_Matches = []
     with open(HMM_Path, 'r') as HMM_Input:
         for line in HMM_Input:
@@ -88,6 +88,7 @@ def read_kmers_from_file(filename, positive_hits, ksize):
     with open(filename) as Fasta_in:
         for title, sequence in SimpleFastaParser(Fasta_in):
             if title.split()[0] in positive_hits:
+                sequence = sequence.replace('*','') # Remove asterisk from prodigal
                 kmers = build_kmers(sequence, ksize)
                 all_kmers += kmers
     return all_kmers
@@ -124,6 +125,9 @@ def Frequency_Calculator(Kmer_Dictionary):
     from skbio.diversity import beta_diversity
     from skbio import DistanceMatrix
     import numpy as np
+    from collections import Counter
+    import matplotlib.pyplot as plt
+    from scipy.stats import invgauss
 
     print("Parsing Kmers...")
     print(datetime.datetime.now())
@@ -132,6 +136,22 @@ def Frequency_Calculator(Kmer_Dictionary):
     for genome, kmers in Kmer_Dictionary.items():
         Total_Kmers_Header += kmers
         Total_Genomes.append(genome)
+    
+    Total_Frequency = Counter(Total_Kmers_Header)
+    Total_Frequency = pd.DataFrame.from_dict(Total_Frequency, orient='index')
+    Freqs = Total_Frequency.iloc[:,0]
+    Freqs = np.asarray(Freqs)
+    mu, loc, scale = invgauss.fit(Freqs)
+    xx = np.linspace(Freqs.min(), Freqs.max(), 500)
+    yy = invgauss.pdf(xx, mu, loc, scale)
+    print(invgauss.var(mu, loc, scale))
+    Std = invgauss.var(mu, loc, scale)**0.5
+    Figure, Axis = plt.subplots(1,1,figsize=(10,10),dpi=300,constrained_layout=True)
+    Axis.hist(Freqs, bins=100, density=True)
+    Axis.plot(xx,yy)
+    Axis.axvline(x=Std*2, linewidth=4, color='r')
+    Figure.savefig("Histogram.png")
+    print("Done plotting")
     Total_Kmers_Header = set(Total_Kmers_Header)
     Kmer_Freqs = pd.DataFrame(0, index=Total_Genomes, columns=Total_Kmers_Header)
     
@@ -148,12 +168,6 @@ def Frequency_Calculator(Kmer_Dictionary):
 
     return BC_Dataframe
 
-    # BC_Dataframe.to_csv("SALIDA.tab", sep="\t", header=True, index=True)
-    
-    # with open("Salida_TAB.txt", 'w') as Output:
-    #     for i in BC_Dataframe.columns:
-    #         for j in BC_Dataframe.columns:
-    #             Output.write("{}\t{}\t{}\n".format(i, j, BC_Dataframe.loc[i,j]))
 #! End ------
 # --- Initialize function ---
 def child_initialize(_dictionary):
