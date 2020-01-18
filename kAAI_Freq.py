@@ -52,9 +52,9 @@ def Kmer_Parser(SCG_HMM_file, Keep):
 
     Kmer_Dic = {}
     HMM_Path = Path(SCG_HMM_file)
-    Name = Path(HMM_Path.name)
+    Name = HMM_Path.name
     Folder = HMM_Path.parent
-    Protein_File = Folder / Name.with_suffix('.faa')
+    Protein_File = Folder / Path(Name).with_suffix('.faa')
     Positive_Matches = []
     with open(HMM_Path, 'r') as HMM_Input:
         for line in HMM_Input:
@@ -65,7 +65,7 @@ def Kmer_Parser(SCG_HMM_file, Keep):
     if Keep == False:
         HMM_Path.unlink()
     kmers = read_kmers_from_file(Protein_File, Positive_Matches, 4)
-    #! Removed set(kmers)
+    Name = Name.replace('.hmm', '')
     Kmer_Dic[Name] = kmers
 
     return Kmer_Dic
@@ -118,57 +118,99 @@ def kAAI_Parser(ID):
             OutFile.write("{}\t{}\t{}\t{}\t{}\n".format(ID, key2, intersection, shorter, fraction))
     return Output
 
-#! TEsting purposes frequency calculation
-def Frequency_Calculator(Kmer_Dictionary):
-    import datetime
-    import pandas as pd
-    from skbio.diversity import beta_diversity
-    from skbio import DistanceMatrix
-    import numpy as np
+#! New Function to Filter Abundant Kmers
+def Kmer_Filter(Kmer_Dictionary, Output):
+    """
+    Counts frequency of kmers, fits an inverse
+    gamma distribution and calculates one stdev
+    to filter kmers higher than this value
+    
+    Arguments:
+        Kmer_Dictionary {[Dictionary]} -- Dictionary of Kmers
+        Output {[String]} -- Output for histogram plot
+    """
     from collections import Counter
     import matplotlib.pyplot as plt
+    import numpy as np
     from scipy.stats import invgauss
+    import pandas as pd
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['font.family'] = 'sans-serif'
+    plt.rcParams['font.sans-serif'] = 'Century Gothic'
+    plt.rcParams.update({'font.size': 25})
 
-    print("Parsing Kmers...")
-    print(datetime.datetime.now())
-    Total_Kmers_Header = []
-    Total_Genomes = []
-    for genome, kmers in Kmer_Dictionary.items():
-        Total_Kmers_Header += kmers
-        Total_Genomes.append(genome)
-    
-    Total_Frequency = Counter(Total_Kmers_Header)
-    Total_Frequency = pd.DataFrame.from_dict(Total_Frequency, orient='index')
+    Total_Kmers = []
+    for kmers in Kmer_Dictionary.values():
+        Total_Kmers += kmers
+    Total_Frequency_Count = Counter(Total_Kmers)
+    Total_Frequency = pd.DataFrame.from_dict(Total_Frequency_Count, orient='index')
     Freqs = Total_Frequency.iloc[:,0]
     Freqs = np.asarray(Freqs)
+    #* Fit and plot data
     mu, loc, scale = invgauss.fit(Freqs)
-    xx = np.linspace(Freqs.min(), Freqs.max(), 500)
-    yy = invgauss.pdf(xx, mu, loc, scale)
-    print(invgauss.var(mu, loc, scale))
+    X_values = np.linspace(Freqs.min(), Freqs.max(), 500)
+    Y_Predicted = invgauss.pdf(X_values, mu, loc, scale)
     Std = invgauss.var(mu, loc, scale)**0.5
     Figure, Axis = plt.subplots(1,1,figsize=(10,10),dpi=300,constrained_layout=True)
-    Axis.hist(Freqs, bins=100, density=True)
-    Axis.plot(xx,yy)
-    Axis.axvline(x=Std*2, linewidth=4, color='r')
-    Figure.savefig("Histogram.png")
-    print("Done plotting")
-    Total_Kmers_Header = set(Total_Kmers_Header)
-    Kmer_Freqs = pd.DataFrame(0, index=Total_Genomes, columns=Total_Kmers_Header)
+    Axis.hist(Freqs, bins=50, density=True, color="#4E8983", label="Kmer Frequencies")
+    Axis.plot(X_values, Y_Predicted, linewidth=2, color="#217B55", label="InvGamma Distribuion")
+    Axis.axvline(x=Std, linewidth=2, color='#960D41', label="Kmer Frequency Cutoff")
+    Axis.legend(loc="best")
+    Axis.set_xlabel("Number of occurrences in dataset")
+    Axis.set_ylabel("Frequency")
+    Figure.savefig(Output + "_plot.png")
+    Low_Abundance_Kmers = []
+    for key, value in Total_Frequency_Count.items():
+        if value >= Std and value <= Std*1.5:
+            Low_Abundance_Kmers.append(key)
+    Low_Abundance_Kmers.sort()
     
-    for genome, kmers in Kmer_Dictionary.items():
-        for kmer in kmers:
-            Kmer_Freqs.loc[genome, kmer] += 1
-    
-    print("Calculating Distances...")
-    print(datetime.datetime.now())
-    Kmer_Data = Kmer_Freqs.to_numpy()
-    Genomes = Kmer_Freqs.index
-    bc_dm = beta_diversity("braycurtis", Kmer_Data, Genomes)
-    BC_Dataframe = bc_dm.to_data_frame()
+    return Low_Abundance_Kmers
 
+
+#! Calculate frequencies individually and return a dataframe
+def Frequency_Calculator(Kmer_Dictionary, Low_Abundance_Kmers):
+    """Calculates the frequencies of Kmers in each genome
+       and returns a table
+    
+    Arguments:
+        Kmer_Dictionary {Dictionary} -- Dictionary of kmers
+    """
+    import pandas as pd
+    from collections import Counter
+    import numpy as np
+
+    Genome_ID = None
+    for key, value in Kmer_Dictionary.items():
+        Counts = dict(Counter(value))
+        Genome_ID = key
+
+    Freq_Table = pd.DataFrame.from_records([Counts])
+    Freq_Table.rename(index={0:Genome_ID}, inplace=True)
+    Freq_Table.filter(items=Low_Abundance_Kmers)
+    Freq_Table = Freq_Table.reindex(Low_Abundance_Kmers, axis=1).fillna(0)
+    Frequencies = Freq_Table.to_numpy()[0]
+
+    return Genome_ID, Frequencies
+
+#! Calculate bray curtis distances?
+def Distance_Calculator(Kmer_Freqs, Genomes):
+    """
+    Calculates bray curtis distances between
+    each pair of genomes
+    
+    Arguments:
+        Kmer_Freqs {Array} -- Dataframe with kmer frequencies
+        Genomes {List} -- List of genome names
+    """
+    from skbio.diversity import beta_diversity
+
+    BC_Distances = beta_diversity("braycurtis", Kmer_Freqs, Genomes)
+    BC_Dataframe = BC_Distances.to_data_frame()
+    BC_Dataframe = 1-BC_Dataframe
+    
     return BC_Dataframe
 
-#! End ------
 # --- Initialize function ---
 def child_initialize(_dictionary):
      global Kmer_Dictionary
@@ -197,6 +239,8 @@ def main():
     from functools import partial
     import datetime
     import shutil
+    import pandas as pd
+    import numpy as np
 
     # Setup parser for arguments.
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
@@ -222,7 +266,7 @@ def main():
     Keep = args.Keep
 
     # Predict proteins and perform HMM searches
-    print("kAAI started on {}".format(datetime.datetime.now())) # Remove after testing
+    print("kAAI started on {}".format(datetime.datetime.now()))
     if Genome_List != None:
         print("Starting from Genomes...")
         print("Predicting proteins...")
@@ -265,47 +309,52 @@ def main():
 
     # Parse HMM results, calculate distances and compile results
     print("Parsing HMM results...")
-    print(datetime.datetime.now()) # Remove after testing
+    print(datetime.datetime.now())
     try:
         pool = multiprocessing.Pool(Threads)
         Kmer_Results = pool.map(partial(Kmer_Parser, Keep=Keep), HMM_Search_Files)
     finally:
         pool.close()
         pool.join()
-
     Final_Kmer_Dict = merge_dicts(Kmer_Results)
 
-    #! TEsting frequencies execution
-    print("Calculate Frequencies...")
-    print(datetime.datetime.now()) # Remove after testing
-    BC_Table = Frequency_Calculator(Final_Kmer_Dict)
-    BC_Table.to_csv(Output + ".table", sep="\t", header=True, index=True)
+    # Estimate total frequency of kmers, plot, and return threshold for filter
+    print("Filtering kmers by frequency...")
+    print(datetime.datetime.now())
+    Low_Abundance_Kmers = Kmer_Filter(Final_Kmer_Dict, Output)
 
-    with open(Output + ".out", 'w') as Output:
-        for i in BC_Table.columns:
-            for j in BC_Table.columns:
-                Output.write("{}\t{}\t{}\n".format(i, j, BC_Table.loc[i,j]))
 
-    print(datetime.datetime.now()) # Remove after testing
-    # # Calculate shared Kmer fraction
-    # print("Calculating shared Kmer fraction...")
-    # print(datetime.datetime.now()) # Remove after testing
-    # ID_List = Final_Kmer_Dict.keys()
-    # try:
-    #     pool = multiprocessing.Pool(Threads, initializer = child_initialize, initargs = (Final_Kmer_Dict,))
-    #     Fraction_Results = pool.map(kAAI_Parser, ID_List)
-    # finally:
-    #     pool.close()
-    #     pool.join()
+    print("Calculating kmer frequencies per genome...")
+    print(datetime.datetime.now())
+    try:
+        pool = multiprocessing.Pool(Threads)
+        Frequency_Results = pool.map(partial(Frequency_Calculator, Low_Abundance_Kmers=Low_Abundance_Kmers),
+         Kmer_Results)
+    finally:
+        pool.close()
+        pool.join()
+    
+    print("Merging tables and filtering...")
+    print(datetime.datetime.now())
+    Genomes = []
+    Arrays = []
+    for i in Frequency_Results:
+        Genomes.append(i[0])
+        Arrays.append(i[1])
+    Array_Kmers = np.vstack(Arrays)
+    # Final_Dataframe = pd.DataFrame(Array_Kmers, index=Genomes)
 
-    #  # Merge results into a single output
-    # print(datetime.datetime.now()) # Remove after testing
-    # with open(Output, 'w') as OutFile:
-    #     for file in Fraction_Results:
-    #         with open(file) as Temp:
-    #             shutil.copyfileobj(Temp, OutFile)
-    #         file.unlink()
+    print("Calculating distances...")
+    print(datetime.datetime.now())
+    BC_Distances = Distance_Calculator(Array_Kmers, Genomes)
+    BC_Distances.to_csv(Output + "_dist.tab", sep="\t", header=True, index=True)
 
+    with open(Output + "_dist.list", 'w') as Outfile:
+        for i in BC_Distances.columns:
+            for j in BC_Distances.columns:
+                Outfile.write("{}\t{}\t{}\n".format(i, j, BC_Distances.loc[i,j]))
+
+    print("kAAI finished on {}".format(datetime.datetime.now())) # Remove after testing
 
 if __name__ == "__main__":
     main()
