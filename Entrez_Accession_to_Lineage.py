@@ -21,11 +21,13 @@ def Get_UID_from_Accession(ID_Table, email, API=None):
     Entrez.email = email
     ID_List = list(ID_Table['Accession'])
     for Accession in ID_List:
-        print(Accession)
-        fetch_handle = Entrez.esearch(db='assembly', term=Accession)
-        Data_Dicts = Entrez.read(fetch_handle)
-        ID_Table.loc[ID_Table['Accession'] == Accession, 'UID'] = Data_Dicts["IdList"][0]
-        fetch_handle.close()
+        try:
+            fetch_handle = Entrez.esearch(db='assembly', term=Accession)
+            Data_Dicts = Entrez.read(fetch_handle)
+            ID_Table.loc[ID_Table['Accession'] == Accession, 'UID'] = Data_Dicts["IdList"][0]
+            fetch_handle.close()
+        except:
+            print("Could not retrieve ID {}".format(Accession))
         sleep(0.1)
     return ID_Table
 # --------------------------------------
@@ -38,13 +40,15 @@ def Get_TaxID_from_UID(ID_Table, email, API=None):
     Entrez.email = email
     ID_List = list(ID_Table['UID'])
     for Accession in ID_List:
-        print(Accession)
-        fetch_handle = Entrez.elink(dbfrom='assembly', db="taxonomy",
+        try:
+            fetch_handle = Entrez.elink(dbfrom='assembly', db="taxonomy",
                                     id=Accession)
-        Data_Dicts = Entrez.read(fetch_handle)
-        TaxID = Data_Dicts[0]['LinkSetDb'][0]['Link'][0]["Id"]
-        ID_Table.loc[ID_Table['UID'] == Accession, 'TaxID'] = TaxID
-        fetch_handle.close()
+            Data_Dicts = Entrez.read(fetch_handle)
+            TaxID = Data_Dicts[0]['LinkSetDb'][0]['Link'][0]["Id"]
+            ID_Table.loc[ID_Table['UID'] == Accession, 'TaxID'] = TaxID
+            fetch_handle.close()
+        except:
+            print("Could not retrieve ID {}".format(Accession))
         sleep(0.1)
     return ID_Table
 #---------------------------------------
@@ -58,16 +62,18 @@ def Get_Lineage_from_TaxID(ID_Table, email, API=None):
     ID_List = list(ID_Table['TaxID'])
     Valid_Ranks = ['superkingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
     for Accession in ID_List:
-        print(Accession)
-        fetch_handle = Entrez.efetch(db='taxonomy', id=Accession)
-        Data_Dicts = Entrez.read(fetch_handle)
-        ID_Table.loc[ID_Table['TaxID'] == Accession, ['species']] = Data_Dicts[0]['ScientificName']
-        for Rank in Data_Dicts[0]['LineageEx']:
-            if Rank['Rank'] in Valid_Ranks:
-                ID_Table.loc[ID_Table['TaxID'] == Accession, Rank['Rank']] = Rank['ScientificName']
-            else:
-                pass
-        fetch_handle.close()
+        try:
+            fetch_handle = Entrez.efetch(db='taxonomy', id=Accession)
+            Data_Dicts = Entrez.read(fetch_handle)
+            ID_Table.loc[ID_Table['TaxID'] == Accession, ['species']] = Data_Dicts[0]['ScientificName']
+            for Rank in Data_Dicts[0]['LineageEx']:
+                if Rank['Rank'] in Valid_Ranks:
+                    ID_Table.loc[ID_Table['TaxID'] == Accession, Rank['Rank']] = Rank['ScientificName']
+                else:
+                    pass
+            fetch_handle.close()
+        except:
+            print("Could not retrieve ID {}".format(Accession))
         sleep(0.1)
     return ID_Table
 
