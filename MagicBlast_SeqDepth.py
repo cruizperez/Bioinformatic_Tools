@@ -19,7 +19,7 @@
 """---1.0 Import Modules---"""
 import numpy as np
 import pandas as pd
-
+from Bio.SeqIO.FastaIO import SimpleFastaParser
 
 ################################################################################
 
