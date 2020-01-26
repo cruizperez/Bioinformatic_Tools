@@ -61,8 +61,8 @@ def calculate_seq_depth(magicblast_file, genome_sizes):
             else:
                 line = line.strip().split()
                 sequence = line[1]
-                seq_start = line[8]
-                seq_end = line[9]
+                seq_start = int(line[8])
+                seq_end = int(line[9])
                 if line[1] not in genome_seq_depth:
                     genome_seq_depth[sequence] = np.zeros(genome_sizes[sequence])
                     genome_seq_depth[sequence][seq_start-1:seq_end-1] += 1
@@ -83,13 +83,16 @@ def save_sequencing_depth_table(genome_seq_depth, output_table):
     sequences = []
     positions = []
     depths = []
-    genome_seq_depth_table = pd.DataFrame(columns=["Genome","Position","Depth"])
+    genome_seq_depth_table = pd.DataFrame(columns=["Sequence","Position","Depth"])
     for sequence, depth_array in genome_seq_depth.items():
         sequence_list = [sequence] * len(depth_array)
         sequences += sequence_list
         position_array = np.array(range(len(depth_array))) + 1
         positions += list(position_array)
         depths += list(depth_array)
+    genome_seq_depth_table["Sequence"] = sequences
+    genome_seq_depth_table["Position"] = positions
+    genome_seq_depth_table["Depth"] = depths
     genome_seq_depth_table.to_csv(output_table, sep="\t", header=True, index=False)
 
 
