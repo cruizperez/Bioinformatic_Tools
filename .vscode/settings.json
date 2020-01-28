@@ -1,5 +1,6 @@
 {
     "python.pythonPath": "C:\\Users\\Carlos\\Anaconda3\\python.exe",
     "python.linting.pylintEnabled": true,
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "better-comments.highlightPlainText": true
 }
