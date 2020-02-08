@@ -41,7 +41,9 @@ def hmmsearch_best_hit(hmmsearch_file, domain, outfile):
                     score = result[8]
                 else:
                     score = result[5]
-                if score in scores:
+                if score < 100:
+                    continue
+                elif score in scores:
                     if score > scores[result[0]][0]:
                         scores[result[0]] = [score, line]
                     elif score == scores[result[0]][0]:
