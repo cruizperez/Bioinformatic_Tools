@@ -38,9 +38,9 @@ def hmmsearch_best_hit(hmmsearch_file, domain, outfile):
             else:
                 result = line.strip().split()
                 if domain == True:
-                    score = result[8]
+                    score = float(result[8])
                 else:
-                    score = result[5]
+                    score = float(result[5])
                 if score < 100:
                     continue
                 elif score in scores:
