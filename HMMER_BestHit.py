@@ -36,7 +36,7 @@ def hmmsearch_best_hit(hmmsearch_file, domain, outfile):
             if line.startswith("#"):
                 headers.append(line)
             else:
-                result = line.strip().split("\t")
+                result = line.strip().split()
                 if domain == True:
                     score = result[8]
                 else:
