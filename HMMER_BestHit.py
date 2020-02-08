@@ -51,6 +51,8 @@ def hmmsearch_best_hit(hmmsearch_file, domain, outfile):
                             continue
                     else:
                         continue
+                else:
+                    scores[result[0]] = [score, line]
     with open(outfile, 'w') as output:
         for element in headers[0:3]:
             output.write("{}\n".format(element))
