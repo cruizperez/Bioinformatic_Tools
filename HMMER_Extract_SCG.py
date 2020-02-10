@@ -45,8 +45,9 @@ def scg_extract_sequence(scg_group, information):
     contig_separator = information[1]
     with open(sequence_file) as fasta_input, open(outfile, 'w') as fasta_output:
         for title, sequence in SimpleFastaParser(fasta_input):
+            title = title.split()[0]
             if title in proteins:
-                genome_id = title.split(contig_separator)[0:-1]
+                genome_id = contig_separator.join(title.split(contig_separator)[0:-1])
                 fasta_output.write(">{}\n{}\n".format(genome_id, sequence))
             else:
                 continue
