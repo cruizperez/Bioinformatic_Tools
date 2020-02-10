@@ -49,7 +49,7 @@ def Calculate_Identity(Sequence_ID):
 
 def main():
     import multiprocessing
-    Sequences = Get_Alignment_Sequences("04.Archaea_Bacteria.16S.fa.reduced.aln.trim")
+    Sequences = Get_Alignment_Sequences("02.Scalindua_Refs_SINA.fasta.trim")
     Sequence_IDs = Sequences.keys()
 
     try:
