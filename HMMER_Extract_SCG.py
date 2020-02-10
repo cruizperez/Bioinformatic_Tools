@@ -66,7 +66,7 @@ def main():
                         required=True, help="Input hmmsearch tabular output")
     parser.add_argument('-f', '--fasta_file', dest='fasta_file', action='store', 
                         required=True, help='File to store filtered hmmsearch results')
-    parser.add_argument('-t', '--threads', dest='threads', action='store', type='int', 
+    parser.add_argument('-t', '--threads', dest='threads', action='store', type=int, 
                         required=False, help='Threads to use. By default 1')
     parser.add_argument('--separator', dest='separator', action='store', 
                         required=False, help='Contig delimiter. By default "--", e.g. Genome1--contig1_gene1')
