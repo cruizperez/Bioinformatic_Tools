@@ -32,7 +32,7 @@ def MagicBlast_filter_slow(input_tab, outfile, aln_fraction = 80, percent_id = 1
             hit = line.split()
             if hit[0] == '#':
                 continue
-            elif float(hit[2]) < ID_Percent:
+            elif float(hit[2]) < percent_id:
                 continue
             elif (float(hit[7]) - float(hit[6]) * 100 / float(hit[15])) < aln_fraction:
                 continue
@@ -62,7 +62,7 @@ def MagicBlast_filter_rapid(input_tab, outfile, aln_fraction = 80, percent_id = 
             hit = line.split()
             if hit[0] == '#':
                 continue
-            elif float(hit[2]) < ID_Percent:
+            elif float(hit[2]) < percent_id:
                 continue
             elif (float(hit[7]) - float(hit[6]) * 100 / float(hit[15])) < aln_fraction:
                 continue
