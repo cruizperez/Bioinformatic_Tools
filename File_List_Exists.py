@@ -27,10 +27,11 @@ def check_files_exist(input_list, folder, outfile):
         folder_path = Path(folder)
         for line in input:
             file_id = line.strip().split("\t")[0]
-            if folder_path / Path(file_id):
+            complete_path = folder_path / file_id
+            if complete_path.exists():
                 continue
             else:
-                output.write(file_id)
+                output.write("{}\n".format(file_id))
 
 ################################################################################
 """---3.0 Main Function---"""
