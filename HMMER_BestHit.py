@@ -21,7 +21,7 @@ from random import randint
 ################################################################################
 
 """---2.0 Define Functions---"""
-def hmmsearch_best_hit(hmmsearch_file, domain, outfile):
+def hmmsearch_best_hit(hmmsearch_file, sequence, threshold, outfile):
     """
     Filters a hmmsearch tab output returning the best hit per protein
     
@@ -37,13 +37,13 @@ def hmmsearch_best_hit(hmmsearch_file, domain, outfile):
                 headers.append(line)
             else:
                 result = line.strip().split()
-                if domain == True:
+                if sequence == False:
                     score = float(result[8])
                 else:
                     score = float(result[5])
-                if score < 100:
+                if score < threshold:
                     continue
-                elif score in scores:
+                elif result[0] in scores:
                     if score > scores[result[0]][0]:
                         scores[result[0]] = [score, line]
                     elif score == scores[result[0]][0]:
@@ -78,17 +78,20 @@ def main():
                         required=True, help="Input hmmsearch tabular output")
     parser.add_argument('-o', '--output_file', dest='output_file', action='store', 
                         required=True, help='File to store filtered hmmsearch results')
-    parser.add_argument('--domain', dest='domain', action='store_false', 
-                        required=False, help='Filter hits by domain score, by default True')
+    parser.add_argument('--sequence', dest='sequence', action='store_true', 
+                        required=False, help='Filter hits by whole sequence score. Default use the domain score')
+    parser.add_argument('--threshold', dest='threshold', action='store', type=int, default=0, 
+                        required=False, help='Score threshold to filter. By default 0 (include all hits)')
     args = parser.parse_args()
 
     hmmsearch = args.hmmsearch
     output_file = args.output_file
-    domain = args.domain
+    sequence = args.sequence
+    threshold = args.threshold
 
 
     # Filter hmmsearch file
-    hmmsearch_best_hit(hmmsearch, domain, output_file)
+    hmmsearch_best_hit(hmmsearch, sequence, threshold, output_file)
 
 if __name__ == "__main__":
     main()
