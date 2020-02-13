@@ -20,7 +20,7 @@ from Bio.SeqIO.FastaIO import SimpleFastaParser
 
 ################################################################################
 """---2.0 Define Functions---"""
-
+#! TODO: Include option to select first OR longest sequence.
 def FastA_Remove_Duplicate(Fasta_File, Output_File):
     Sequences = {}
     Output = open(Output_File, 'w')
