@@ -71,14 +71,19 @@ def main():
                         required=True, help='File to store filtered hmmsearch results')
     parser.add_argument('-o', '--outfile', dest='outfile', action='store', 
                         required=True, help='File to store filtered hmmsearch results')
-    parser.add_argument('--genome_separator', dest='genome_separator', action='store', default="--", 
-                        required=False, help='Filter hits by domain score, by default True')
+    parser.add_argument('--genome_separator', dest='genome_separator', action='store', default="--", nargs=argparse.REMAINDER,
+                        required=False, help='Contig delimiter. By default "--", e.g. Genome1--contig1_gene1\nIf separator contains - or -- pass it as --separator="--"')
     args = parser.parse_args()
 
     hmmsearch = args.hmmsearch
     models_file = args.models_file
     outfile = args.outfile
     genome_separator = args.genome_separator
+
+    if isinstance(genome_separator, list):
+        genome_separator = genome_separator[0]
+    else:
+        genome_separator =  genome_separator
 
     # Calculate completeness and contamination
     calculate_completeness(hmmsearch, models_file, outfile, genome_separator)
