@@ -78,6 +78,11 @@ def main():
     threads = args.threads
     separator = args.separator
 
+    if isinstance(separator, list):
+        separator = separator[0]
+    else:
+        continue
+
     scg_groups = hmm_extract_scg_genes(hmmsearch)
     scg_list = []
     for key, value in scg_groups.items():
