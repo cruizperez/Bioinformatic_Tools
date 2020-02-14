@@ -81,7 +81,7 @@ def main():
     if isinstance(separator, list):
         separator = separator[0]
     else:
-        continue
+        separator =  separator
 
     scg_groups = hmm_extract_scg_genes(hmmsearch)
     scg_list = []
