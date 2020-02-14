@@ -69,8 +69,8 @@ def main():
                         required=True, help='File to store filtered hmmsearch results')
     parser.add_argument('-t', '--threads', dest='threads', action='store', type=int, 
                         required=False, help='Threads to use. By default 1')
-    parser.add_argument('--separator', dest='separator', action='store', default='--',
-                        required=False, help='Contig delimiter. By default "--", e.g. Genome1--contig1_gene1')
+    parser.add_argument('--separator', dest='separator', action='store', default='--', nargs=argparse.REMAINDER,
+                        required=False, help='Contig delimiter. By default "--", e.g. Genome1--contig1_gene1\nIf separator contains - or -- pass it as --separator="--"')
     args = parser.parse_args()
 
     hmmsearch = args.hmmsearch
