@@ -29,15 +29,16 @@ from pathlib import Path
 def sra_downloader(sra_id, output, ascp_bin=None, id_rsa=None):
     if ascp_bin != None and id_rsa != None:
         ascp_options = '\'' + str(ascp_bin) + '|' + str(id_rsa) + '\''
-        subprocess.call(['prefetch', '-p', '1', '-a', ascp_options, "--ascp-options", '"-k 1 -T -l100m"',
-                        "-O", output, sra_id])
+        subprocess.call(['prefetch', '-p', '1', '-a', ascp_options, "--ascp-options",
+                        '"-k 1 -T -l100m"', "-O", output, sra_id])
     else:
         subprocess.call(['prefetch', '-p', '1', "-O", output, sra_id])
 
 def fastq_dump(sra_id, output, clean=True):
     output_folder = Path(output) / Path(sra_id)
     file_path = (Path(output) / Path(sra_id) / sra_id).with_suffix('.sra')
-    subprocess.call(['fastq-dump', '--split-files', '-I', '-O', str(output_folder), str(file_path)])
+    subprocess.call(['fastq-dump', '--split-files', '-I', '-O', str(output_folder), 
+                    str(file_path)])
     if clean == True:
         file_path.unlink()
 
@@ -47,11 +48,11 @@ def fastq_dump(sra_id, output, clean=True):
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
-                                    description='''Download a given SRA dataset and converts it into the corresponding\n'''
-                                    '''FastQ files, spliting the file into reads 1 and 2, if possible.\n'''
-                                    '''Requires at least sra-toolik, recommended with Aspera Connect\n'''
-                                    '''Global mandatory parameters: -l [ID File] or -s [ID List]\n'''
-                                    '''Optional Database Parameters: See ''' + sys.argv[0] + ' -h')
+            description='''Download a given SRA dataset and converts it into the corresponding\n'''
+            '''FastQ files, spliting the file into reads 1 and 2, if possible.\n'''
+            '''Requires at least sra-toolik, recommended with Aspera Connect\n'''
+            '''Global mandatory parameters: -l [ID File] or -s [ID List]\n'''
+            '''Optional Database Parameters: See ''' + sys.argv[0] + ' -h')
     parser.add_argument('-l', '--list_ids', dest='list_ids', action='store', required=False,
                         help='File with SRA id(s) to download (one per line).')
     parser.add_argument('-s', '--sra_ids', dest='Sra_IDs', action='store', nargs='+', required=False,
@@ -79,7 +80,8 @@ def main():
     # Parse input list or file
     list_sra_ids = []
     if list_ids != None and Sra_IDs != None:
-        sys.exit("Please provide either a space-separated list of IDs OR a file with one ID per line, not both")
+        sys.exit("Please provide either a space-separated list of IDs OR a file with one ID \
+            per line, not both")
     elif Sra_IDs != None:
         list_sra_ids = Sra_IDs
     elif list_ids != None:
