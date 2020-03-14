@@ -20,6 +20,7 @@
 import numpy as np
 import pandas as pd
 from Bio.SeqIO.FastaIO import SimpleFastaParser
+import argparse, sys
 
 ################################################################################
 
@@ -61,8 +62,8 @@ def calculate_seq_depth(magicblast_file, genome_sizes):
             else:
                 line = line.strip().split()
                 sequence = line[1]
-                seq_start = int(line[8])
-                seq_end = int(line[9])
+                seq_start = min(int(line[8]), int(line[9]))
+                seq_end = max(int(line[8]), int(line[9]))
                 if line[1] not in genome_seq_depth:
                     genome_seq_depth[sequence] = np.zeros(genome_sizes[sequence])
                     genome_seq_depth[sequence][seq_start-1:seq_end-1] += 1
@@ -100,14 +101,13 @@ def save_sequencing_depth_table(genome_seq_depth, output_table):
 """---3.0 Main Function---"""
 
 def main():
-    import argparse, sys
     # Setup parser for arguments.
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
             description='''This script parses a MagicBlast tabular output and\n'''
                         '''the reference sequences (in FastA format) and returns\n'''
                         '''the base by base sequencing depth of each reference contig/genome\n'''
-                                    'Global mandatory parameters: [MagicBlast File] [Reference FastA]\n'
-                                    'Optional Database Parameters: See ' + sys.argv[0] + ' -h')
+                        'Global mandatory parameters: -i [MagicBlast File] -f [Reference FastA] -o [Output Table]\n'
+                        'Optional Database Parameters: See ' + sys.argv[0] + ' -h')
     parser.add_argument("-i", "--input_magicblast", dest='magic_blast', action='store', 
                         required=True, help="Input MagiBlast tabular output")
     parser.add_argument('-f', '--fasta_sequences', dest='fasta_sequences', action='store', 
@@ -120,14 +120,12 @@ def main():
     fasta_sequences = args.fasta_sequences
     output_table = args.output_table
 
-
     # Calculate Genome Length and Sequencing Depth
     genome_sizes = get_genome_sizes(fasta_sequences)
     genome_seq_depth = calculate_seq_depth(magic_blast, genome_sizes)
     
     # Save output
     save_sequencing_depth_table(genome_seq_depth, output_table)
-
 
 if __name__ == "__main__":
     main()

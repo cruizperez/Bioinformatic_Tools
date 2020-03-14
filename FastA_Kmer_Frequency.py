@@ -21,7 +21,7 @@ from Bio.SeqIO.FastaIO import SimpleFastaParser
 
 ################################################################################
 """---1.0 Define Functions---"""
-def calculate_kmer_frequency(input_sequence_file, kmer_len):
+def calculate_kmer_frequency(input_sequence_file, kmer_len, normalize):
     # Calculate possible nucleotide combinations
     nucl = "ATCG"
     possible_kmers = []
@@ -39,11 +39,17 @@ def calculate_kmer_frequency(input_sequence_file, kmer_len):
     kmer_frequency_matrix = pd.DataFrame(0, index=sequences, columns=possible_kmers)
     # Populate frequency matrix
     with open(input_sequence_file) as fasta_input:
-        for identifier, sequence in SimpleFastaParser(fasta_input):
-            kmers_sequence = get_kmers(sequence, kmer_len)
-            for kmer in kmers_sequence:
-                kmer_frequency_matrix.loc[identifier, kmer] += 1
-    
+        if normalize == True:
+            for identifier, sequence in SimpleFastaParser(fasta_input):
+                sequence_len = len(sequence)
+                kmers_sequence = get_kmers(sequence, kmer_len)
+                for kmer in kmers_sequence:
+                    kmer_frequency_matrix.loc[identifier, kmer] += 1/sequence_len
+        else:
+            for identifier, sequence in SimpleFastaParser(fasta_input):
+                kmers_sequence = get_kmers(sequence, kmer_len)
+                for kmer in kmers_sequence:
+                    kmer_frequency_matrix.loc[identifier, kmer] += 1
     return kmer_frequency_matrix
 
 def get_kmers(sequence, ksize):
@@ -62,23 +68,29 @@ def main():
     import argparse, sys
     # Setup parser for arguments.
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
-            description='''This script builds a sqlite database from a tab separated table.\n'''
-            '''By default it assumes the first line of the input table has headers, if not\n'''
-            '''you must provide a list of headers as --header header1,header2,header3...\n'''
-            '''Usage: ''' + sys.argv[0] + ''' -i [Input Table] -d [Database Name]\n'''
-            '''Global mandatory parameters: -i [Input Table] -d [Database Name]\n'''
+            description='''Calculates k-mer frequencies of every sequence in a given FastA file.\n'''
+                        '''Returns a matrix with sequences in rows and kmer in the columns.\n'''
+            '''Usage: ''' + sys.argv[0] + ''' -i [FastA File] -o [Output Table] -k [kmer lenght]\n'''
+            '''Global mandatory parameters: -i [FastA File] -o [Output Table]\n'''
             '''Optional Database Parameters: See ''' + sys.argv[0] + ' -h')
-    parser.add_argument('-i', '--input', dest='input_table', action='store', required=True,
-                        help='Input tab-delimited table to parse, by default assumes headers are present')
-    # parser.add_argument('-d', '--database', dest='database', action='store', required=True,
-    #                     help='Database name, can be exisiting or new.')
+    parser.add_argument('-i', '--input', dest='input_fasta', action='store', required=True,
+                        help='Input FastA file to parse.')
+    parser.add_argument('-k', '--kmer', dest='kmer', action='store', required=False, type=int, default=4,
+                        help='Kmer length, by default 4')
+    parser.add_argument('-o', '--outfile', dest='output_table', action='store', required=True,
+                        help='Output table')
+    parser.add_argument('--normalize', dest='normalize', action='store_false', required=False,
+                        help='Normalize frequencies by sequence length. By default True.')
     args = parser.parse_args()
 
-    input_table = args.input_table
-    # database = args.database
+    input_fasta = args.input_fasta
+    kmer = args.kmer
+    output_table = args.output_table
+    normalize = args.normalize
 
     # ----------------------------
-    calculate_kmer_frequency(input_table, 4)
+    kmer_frequency_table = calculate_kmer_frequency(input_fasta, kmer, normalize)
+    kmer_frequency_table.to_csv(output_table, sep="\t", header=True, index=True)
     # ----------------------------
 
 if __name__ == "__main__":
