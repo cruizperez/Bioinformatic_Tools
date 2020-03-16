@@ -24,45 +24,46 @@
 
 import sys, argparse, os
 from random import choice
+from sys import argv
 
 ################################################################################
 
 """---2.0 Define Functions---"""
-def hit_confidence(line, id_perc=30, bitscore=50, evalue=10, aln_percent=None, shorter=False, query=False, subject=False):
+def hit_confidence(hit, id_perc, bitscore, evalue, aln_percent, shorter, query, subject):
     if aln_percent == None:
-        if float(line[2]) >= float(id_perc) and float(line[11]) >= float(bitscore) and float(line[10]) <= float(evalue):
+        if float(hit[2]) >= float(id_perc) and float(hit[11]) >= float(bitscore) and float(hit[10]) <= float(evalue):
             high_quality_match = True
         else:
             high_quality_match = False
     else:
         if shorter == True:
-            if (int(line[3])*100/min(int(line[13]),int(line[12])) >= float(aln_percent)) \
-                and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id_perc) and float(line[10]) <= float(evalue):
+            if (float(hit[3])*100/min(float(hit[13]),float(hit[12])) >= float(aln_percent)) \
+                and float(hit[11]) >= float(bitscore) and float(hit[2]) >= float(id_perc) and float(hit[10]) <= float(evalue):
                 high_quality_match = True
             else:
                 high_quality_match = False
         elif query == True:
-            if (int(line[3])*100/int(line[12])) >= float(aln_percent) and float(line[11]) \
-                >= float(bitscore) and float(line[2]) >= float(id_perc) and float(line[10]) <= float(evalue):
+            if (float(hit[3])*100/float(hit[12])) >= float(aln_percent) and float(hit[11]) \
+                >= float(bitscore) and float(hit[2]) >= float(id_perc) and float(hit[10]) <= float(evalue):
                 high_quality_match = True
             else:
                 high_quality_match = False
         elif subject == True:
-            if (int(line[3])*100/int(line[13])) >= float(aln_percent) and float(line[11]) \
-                >= float(bitscore) and float(line[2]) >= float(id_perc) and float(line[10]) <= float(evalue):
+            if (float(hit[3])*100/float(hit[13])) >= float(aln_percent) and float(hit[11]) \
+                >= float(bitscore) and float(hit[2]) >= float(id_perc) and float(hit[10]) <= float(evalue):
                 high_quality_match = True
             else:
                 high_quality_match = False
         else:
-            if (int(line[3])*100/max(int(line[13]),int(line[12])) >= float(aln_percent)) \
-                and float(line[11]) >= float(bitscore) and float(line[2]) >= float(id_perc) and float(line[10]) <= float(evalue):
+            if (float(hit[3])*100/max(float(hit[13]),float(hit[12])) >= float(aln_percent)) \
+                and float(hit[11]) >= float(bitscore) and float(hit[2]) >= float(id_perc) and float(hit[10]) <= float(evalue):
                 high_quality_match = True
             else:
                 high_quality_match = False
     return(high_quality_match)
 
 ### ----------------------------- Blast Parser ----------------------------------------
-def blast_filter_slow(input_tab, outfile, id_perc=30, bitscore=50, evalue=10, aln_percent=None, shorter=False, query=False, subject=False):
+def blast_filter_slow(input_tab, outfile, id_perc, bitscore, evalue, aln_percent, shorter, query, subject):
     blast_hits = {}
     print("Reading " + input_tab + " Blast Output")
     # Check if Blast output has qlen and slen in addition to std output.
@@ -76,7 +77,14 @@ def blast_filter_slow(input_tab, outfile, id_perc=30, bitscore=50, evalue=10, al
     if all(variable is None for variable in [id_perc, bitscore, evalue, aln_percent]):
         print("Retrieving best match per sequence using default parameters.")
     else:
-        print("Retrieving best match per seqeunce using parameters you provided (if only some, the others will take their default values.")
+        print("Retrieving best match per seqeunce using parameters you provided. If only some provided, the others will take their default values.")
+    # Setting default values if not provided
+    if id_perc is None:
+        id_perc = 30
+    if bitscore is None:
+        bitscore = 50
+    if evalue is None:
+        evalue = 10
     # Retrieve best matches
     with open(input_tab) as blast_input:
         for line in blast_input:
@@ -84,24 +92,23 @@ def blast_filter_slow(input_tab, outfile, id_perc=30, bitscore=50, evalue=10, al
             hit = line.split("\t")
             good_hit = hit_confidence(hit, id_perc, bitscore, evalue, aln_percent, shorter, query, subject)
             if good_hit == True:
-                if line[0] not in blast_hits:
-                    blast_hits[line[0]] = [float(hit[11]), [line]]
+                if hit[0] not in blast_hits:
+                    blast_hits[hit[0]] = [float(hit[11]), [line]]
                 else:
-                    if float(line[11]) < blast_hits[line[0]][0]:
+                    if float(hit[11]) < blast_hits[hit[0]][0]:
                         continue
-                    elif float(line[11]) > blast_hits[line[0]][0]:
-                        blast_hits[line[0]] = [float(hit[11]), line]
+                    elif float(hit[11]) > blast_hits[hit[0]][0]:
+                        blast_hits[hit[0]] = [float(hit[11]), [line]]
                     else:
-                        blast_hits[line[0]][1].append(line)
+                        blast_hits[hit[0]][1].append(line)
             else:
                 continue
-    
     with open(outfile, 'w') as output:
         for hit_values in blast_hits.values():
             output.write("{}\n".format(choice(hit_values[1])))
     print("Done! Check your output {}".format(outfile))
 
-def blast_filter_fast(input_tab, outfile, id_perc=30, bitscore=50, evalue=10, aln_percent=None, shorter=False, query=False, subject=False):
+def blast_filter_fast(input_tab, outfile, id_perc, bitscore, evalue, aln_percent, shorter, query, subject):
     blast_hits = []
     print("Reading " + input_tab + " Blast Output")
     # Check if Blast output has qlen and slen in addition to std output.
@@ -116,6 +123,13 @@ def blast_filter_fast(input_tab, outfile, id_perc=30, bitscore=50, evalue=10, al
         print("Retrieving best match per sequence using default parameters.")
     else:
         print("Retrieving best match per seqeunce using parameters you provided (if only some, the others will take their default values.")
+    # Setting default values if not provided
+    if id_perc is None:
+        id_perc = 30
+    if bitscore is None:
+        bitscore = 50
+    if evalue is None:
+        evalue = 10
     # Retrieve best matches
     with open(input_tab, 'r') as tabular, open(outfile, 'w') as output:
         for line in tabular:
@@ -150,22 +164,22 @@ def main():
         input_options.add_argument('-o', '--outfile', dest='outfile', action='store', required=True,
                             help='Output filtered blast result in tabular format')
         thresholds = parser.add_argument_group('Thresholds used for filtering')
-        thresholds.add_argument('--id_perc', dest='id_perc', action='store', type='float',
+        thresholds.add_argument('--id_perc', dest='id_perc', action='store', type=float,
                             help='Minimum percentage identity for a match to be included. By default 30')
-        thresholds.add_argument('--bistcore', dest='bitscore', action='store', type='float',
+        thresholds.add_argument('--bistcore', dest='bitscore', action='store', type=float,
                             help='Minimum bitscore for a match to be included. By default 50')
-        thresholds.add_argument('--evalue', dest='evalue', action='store', type='float',
+        thresholds.add_argument('--evalue', dest='evalue', action='store', type=float,
                             help='Maximum Evalue for a match to be included. By default 10')
-        thresholds.add_argument('--aln_percent', dest='aln_percent', action='store', type='float',
-                            help='Minimum alignment the match must cover to be included. \
-                                Only calculated if you have qlen and slen in your output.')
+        thresholds.add_argument('--aln_percent', dest='aln_percent', action='store', type=float,
+                            help='Minimum alignment the match must cover to be included.\n' 
+                                'Only calculated if you have qlen and slen in your output.')
         flags = parser.add_argument_group('Additional flags. Only calculated if you have qlen and slen in your output.')
         flags.add_argument('--longer', action='store_true',
                             help='Calculates the alignment percentage on the longer sequence, by default calculated on the shorter')
         flags.add_argument('--query', action='store_true',
-                            help='Calculates the alignment percentage on the query sequence, by default false, i.e. calculated on the longer')
+                            help='Calculates the alignment percentage on the query sequence, by default false, i.e. calculated on the shorter')
         flags.add_argument('--subject', action='store_true',
-                            help='Calculates the alignment percentage on the subject sequence, by default false, i.e. calculated on the longer')
+                            help='Calculates the alignment percentage on the subject sequence, by default false, i.e. calculated on the shorter')
         mode = parser.add_argument_group('Filtering mode. Activate fast filtering by passing "--rapid"')
         mode.add_argument('--rapid', action='store_true',
                             help='Performs rapid filtering, see help for requirements.')
