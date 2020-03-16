@@ -37,9 +37,9 @@ def calculate_tad_from_file(input_table, tad_percent, separator, outfile):
                 else:
                     line = line.strip().split()
                     if line[0] not in genome_seq:
-                        genome_seq[line[0]] = [line[2]]
+                        genome_seq[line[0]] = [float(line[2])]
                     else:
-                        genome_seq[line[0]].append(line[2])
+                        genome_seq[line[0]].append(float(line[2]))
     else:
         with open(input_table, 'r') as seqdepth:
             for line in seqdepth:
@@ -49,9 +49,9 @@ def calculate_tad_from_file(input_table, tad_percent, separator, outfile):
                     line = line.strip().split()
                     genome = line[0].split(separator)[0]
                     if genome not in genome_seq:
-                        genome_seq[genome] = [line[2]]
+                        genome_seq[genome] = [float(line[2])]
                     else:
-                        genome_seq[genome].append(line[2])
+                        genome_seq[genome].append(float(line[2]))
     
     with open(outfile, 'w') as output:
         output.write("Genome\tTAD{}\n".format(tad_percent))
@@ -104,7 +104,7 @@ def main():
                         required=True, help='Output table in the form [Sequence Name]\t[Position]\t[Depth]')
     parser.add_argument('--tad', dest='tad', action='store', required=False, default=80, type=int,
                         help='''TAD percentage to calculate. By default 80.\n''')
-    parser.add_argument('--separator', dest='separator', action='store', required=False,
+    parser.add_argument('--separator', dest='separator', action='store', required=False, nargs=argparse.REMAINDER,
                         help='''String separating genome name from contig. By default None, i.e., calculates the sequencing depth per contig.\n'''
                              '''If separator has "-" or "--" pass it as --separator="--"''')
     args = parser.parse_args()
@@ -113,6 +113,8 @@ def main():
     output_table = args.output_table
     tad = args.tad
     separator = args.separator
+    if isinstance(separator, list):
+        separator = separator[0]
 
     # Calculate TAD and store results
     calculate_tad_from_file(seqdepth, tad, separator, output_table)
