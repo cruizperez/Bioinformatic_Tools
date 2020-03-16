@@ -2,22 +2,24 @@
 
 """
 ########################################################################
-# Author:	   Carlos Ruiz
-# Institution:   Georgia Institute of Technology
-# Version:	  1.2
-# Date:		 09 February 2020
+# Author:       Carlos A. Ruiz-Perez
+# Email:        cruizperez3@gatech.edu
+# Github:       https://github.com/cruizperez
+# Institution:  Georgia Institute of Technology
+# Version:      0.1
+# Date:         15 February 2020
 
 # Description: This script filters a MagicBlast tabular output based
 # on the id percentage of the read and the length aligned.
 # The rapid option (--rapid) assumes you have shuffled and re-sorted the input file
-# and only retains the first ocurrence per read (usually the highest scoring).
+# and only retains the first ocurrence per read (the highest scoring).
 # The regular option compares each ocurrence of a hit and determines the best
 # hit without you having to do additional work.
 ########################################################################
 """
 ################################################################################
 """---0.0 Import Modules---"""
-from numpy.random import randint
+from random import choice
 import argparse
 from sys import argv
 
@@ -25,11 +27,12 @@ from sys import argv
 """---1.0 Define Functions---"""
 
 def MagicBlast_filter_slow(input_tab, outfile, aln_fraction = 80, percent_id = 1):
-    MagicBlast_hits = {}
+    print("Performing slow filtering...")
+    magicblast_hits = {}
     with open(input_tab) as tabular:
         for line in tabular:
             line = line.strip()
-            hit = line.split()
+            hit = line.split("\t")
             if hit[0] == '#':
                 continue
             elif float(hit[2]) < percent_id:
@@ -38,28 +41,27 @@ def MagicBlast_filter_slow(input_tab, outfile, aln_fraction = 80, percent_id = 1
                 continue
             else:
                 score = float(hit[12])
-                if hit[0] not in MagicBlast_hits:
-                    MagicBlast_hits[hit[0]] = [score, line]
+                if hit[0] not in magicblast_hits:
+                    magicblast_hits[hit[0]] = [score, [line]]
                 else:
-                    if score < MagicBlast_hits[hit[0]][0]:
+                    if score < magicblast_hits[hit[0]][0]:
                         continue
-                    elif score > MagicBlast_hits[hit[0]][0]:
-                        MagicBlast_hits[hit[0]] = [score, line]
+                    elif score > magicblast_hits[hit[0]][0]:
+                        magicblast_hits[hit[0]] = [score, [line]]
                     else:
-                        if randint(2) > 0:
-                            MagicBlast_hits[hit[0]] = [score, line]
-                        else:
-                            continue
+                        magicblast_hits[hit[0]][1].append(line)
     with open(outfile, 'w') as output:
-        for hit_values in MagicBlast_hits.values():
-            output.write("{}\n".format(hit_values[1]))
+        for hit_values in magicblast_hits.values():
+            output.write("{}\n".format(choice(hit_values[1])))
+    print("Done! Check your output {}".format(outfile))
                     
-def MagicBlast_filter_rapid(input_tab, outfile, aln_fraction = 80, percent_id = 1):
-    MagicBlast_hits = []
+def MagicBlast_filter_fast(input_tab, outfile, aln_fraction = 80, percent_id = 1):
+    print("Performing fast filtering...")
+    magicblast_hits = []
     with open(input_tab, 'r') as tabular, open(outfile, 'w') as output:
         for line in tabular:
             line = line.strip()
-            hit = line.split()
+            hit = line.split("\t")
             if hit[0] == '#':
                 continue
             elif float(hit[2]) < percent_id:
@@ -67,11 +69,12 @@ def MagicBlast_filter_rapid(input_tab, outfile, aln_fraction = 80, percent_id = 
             elif (float(hit[7]) - float(hit[6]) * 100 / float(hit[15])) < aln_fraction:
                 continue
             else:
-                if hit[0] not in MagicBlast_hits:
+                if hit[0] not in magicblast_hits:
                     output.write("{}\n".format(line))
-                    MagicBlast_hits.append(hit[0])
+                    magicblast_hits.append(hit[0])
                 else:
                     continue
+    print("Done! Check your output {}".format(outfile))
 
 ################################################################################
 """---2.0 Main Function---"""
