@@ -33,7 +33,7 @@ def MagicBlast_filter_slow(input_tab, outfile, aln_fraction = 80, percent_id = 1
         for line in tabular:
             line = line.strip()
             hit = line.split("\t")
-            if hit[0] == '#':
+            if line.startswith('#'):
                 continue
             elif float(hit[2]) < percent_id:
                 continue
