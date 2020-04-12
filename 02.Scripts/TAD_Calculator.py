@@ -15,7 +15,7 @@
 # edges) covered genome regions.
 ########################################################################
 """
-
+#! TODO ADD OPTION FOR TAD100 AND CONSIDER ONLY NON-ZERO POSITIONS
 ################################################################################
 
 """---1.0 Import Modules---"""

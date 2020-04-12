@@ -25,7 +25,7 @@ import numpy as np
 
 def Pangenome(Matrix, Core = 80, Flexible = 50, Permutations = 100, Plot=False):
     # Read input matrix into a dataframe
-    Pangenome_Matrix = pd.read_csv(Matrix, sep="\t")
+    Pangenome_Matrix = pd.read_csv(Matrix, sep="\t", header=0, index_col=0)
     Num_Genomes = Pangenome_Matrix.shape[1]
     Record_count = 0
     PG_Dictionary = {}

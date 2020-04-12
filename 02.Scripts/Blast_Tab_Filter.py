@@ -184,7 +184,7 @@ def main():
         mode.add_argument('--rapid', action='store_true',
                             help='Performs rapid filtering, see help for requirements.')
         args = parser.parse_args()
-
+#! CORRECT LONGER VS SHORTER SEQUENCE
         input_tab = args.input_tab
         outfile = args.outfile
         id_perc = args.id_perc
