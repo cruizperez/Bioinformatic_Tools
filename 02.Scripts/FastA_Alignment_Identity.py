@@ -37,12 +37,12 @@ def Get_Alignment_Sequences(Alignment_File):
     return Dictionary
 
 def calculate_global_identity(Sequence_ID):
-    with open(Output, 'a') as Identity_File:
-        for Title_B, Seq_B in Sequence_Dictionary.items():
-            Seq_A = Sequence_Dictionary[Sequence_ID]
+    with open(output, 'a') as Identity_File:
+        for Title_B, Seq_B in sequence_dictionary.items():
+            Seq_A = sequence_dictionary[Sequence_ID]
             Aln_Len = 0
             Match_Len = 0
-            Len_Iter = max(len(Sequence_Dictionary[Sequence_ID]), len(Seq_B))
+            Len_Iter = max(len(sequence_dictionary[Sequence_ID]), len(Seq_B))
             for i in range(Len_Iter):
                 if Seq_A[i] == "-" and Seq_B[i] == "-":
                     continue
@@ -54,12 +54,12 @@ def calculate_global_identity(Sequence_ID):
             Identity_File.write("{}\t{}\t{}\n".format(Sequence_ID,Title_B,Match_Len/Aln_Len))
 
 def calculate_local_identity(Sequence_ID):
-    with open(Output, 'a') as Identity_File:
-        for Title_B, Seq_B in Sequence_Dictionary.items():
-            Seq_A = Sequence_Dictionary[Sequence_ID]
+    with open(output, 'a') as Identity_File:
+        for Title_B, Seq_B in sequence_dictionary.items():
+            Seq_A = sequence_dictionary[Sequence_ID]
             Aln_Len = 0
             Match_Len = 0
-            Len_Iter = max(len(Sequence_Dictionary[Sequence_ID]), len(Seq_B))
+            Len_Iter = max(len(sequence_dictionary[Sequence_ID]), len(Seq_B))
             for i in range(Len_Iter):
                 if Seq_A[i] == "-" and Seq_B[i] == "-":
                     continue
