@@ -58,7 +58,7 @@ def calculate_tad_from_file(input_table, tad_percent, separator, outfile):
         for genome, depth in genome_seq.items():
             positions = round(len(depth)*to_remove/100)
             seq_sorted = sorted(depth, key=float)[positions:-positions]
-            output.write("{}\t{}\n".format(genome, round(mean(seq_sorted),1)))
+            output.write("{}\t{}\n".format(genome, round(mean(seq_sorted),3)))
 
 def calculate_tad_from_dict(input_dict, tad_percent, separator, outfile):
     to_remove = (100 - tad_percent)/2
