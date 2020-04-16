@@ -8,8 +8,12 @@
 # Version:	   0.9
 # Date:		   21 February 2020
 
-# Description: This script calculates the global or local identities
-# for each pair of sequences in a FastA-formatted alignment.
+# Description: This script performs a global pairwise alignment using the 
+# Needleman–Wunsch algorithm implemented in Biopython and using the same
+# parameters as in EMBOSS_Needle alignment (DNAfull matrix).
+# It then calculates the global or local identities, defined as the number
+# of matches over the total alignment length or over the nucleotides present
+# (excluding gaps).
 ########################################################################
 """
 
@@ -101,11 +105,15 @@ def calculate_local_identity(alignment):
 def main():
     # Setup parser for arguments.
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
-            description='''This script calculates the global or local identities\n'''
-                        '''for each pair of sequences in a FastA-formatted alignment.\n'''
-                        '''Global mandatory parameters: -f [Folder] -o [Output File] -i OR -l [Input files]\n'''
+            description='''This script performs a global pairwise alignment using the\n''' 
+                        '''Needleman–Wunsch algorithm implemented in Biopython and using the same\n'''
+                        '''parameters as in EMBOSS_Needle alignment (DNAfull matrix).\n'''
+                        '''It then calculates the global or local identities, defined as the number\n'''
+                        '''of matches over the total alignment length or over the nucleotides present\n'''
+                        '''(excluding gaps).\n'''
+                        '''Global mandatory parameters: -i [Input Fasta] -o [Output File]\n'''
                         '''Optional Database Parameters: See ''' + sys.argv[0] + ' -h')
-    parser.add_argument('-i', '--input', dest='input_file', action='store', required=True, help='Alignment file in FastA format.')
+    parser.add_argument('-i', '--input', dest='input_file', action='store', required=True, help='Fasta file with sequences to align.')
     parser.add_argument('-o', '--output_file', dest='output_file', action='store', required=True, help='Tabular file to save identities.')
     parser.add_argument('-t', '--threads', dest='threads', action='store', type=int, required=False, default=1, help='Threads to use. By default 1')
     parser.add_argument('--local', dest='local', action='store_true', required=False, help='Calculate local identities. By default calculates global.')
