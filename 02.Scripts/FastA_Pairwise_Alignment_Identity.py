@@ -46,6 +46,13 @@ def get_sequences(fasta_file):
             dictionary[title] = sequence
     return dictionary
 
+def get_queries(query_file):
+    query_list = []
+    with open(query_file, 'r') as queries:
+        for line in queries:
+            query_list.append(line.strip())
+    return query_list
+
 def get_substitution_matrix():
     script_path = Path(__file__)
     script_dir = script_path.parent
@@ -113,24 +120,27 @@ def main():
                         '''(excluding gaps).\n'''
                         '''Global mandatory parameters: -i [Input Fasta] -o [Output File]\n'''
                         '''Optional Database Parameters: See ''' + sys.argv[0] + ' -h')
-    parser.add_argument('-i', '--input', dest='input_file', action='store', required=True, help='Fasta file with sequences to align.')
+    parser.add_argument('-f', '--fasta', dest='fasta_file', action='store', required=True, help='Fasta file with all sequences to align (references).')
+    parser.add_argument('-q', '--query', dest='query', action='store', required=True, help='File with list of ids to use as queries vs all refs.')
     parser.add_argument('-o', '--output_file', dest='output_file', action='store', required=True, help='Tabular file to save identities.')
     parser.add_argument('-t', '--threads', dest='threads', action='store', type=int, required=False, default=1, help='Threads to use. By default 1')
     parser.add_argument('--local', dest='local', action='store_true', required=False, help='Calculate local identities. By default calculates global.')
     args = parser.parse_args()
 
-    input_file = args.input_file
+    fasta_file = args.fasta_file
+    query = args.query
     output_file = args.output_file
     local = args.local
     threads = args.threads
 
     subsmatrix = get_substitution_matrix()
-    sequences = get_sequences(input_file)
+    sequences = get_sequences(fasta_file)
     sequence_ids = sequences.keys()
+    query_list = get_queries(query)
     try:
         pool = multiprocessing.Pool(threads, initializer = child_initialize, 
         initargs = (sequences, output_file, subsmatrix, local))
-        pool.map(perform_global_alignment, sequence_ids)
+        pool.map(perform_global_alignment, query_list)
     finally:
         pool.close()
         pool.join()
