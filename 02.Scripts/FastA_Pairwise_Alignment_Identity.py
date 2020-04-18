@@ -64,17 +64,21 @@ def get_substitution_matrix():
 
 
 def perform_global_alignment(sequence_id):
+    identity_dictionary = {}
     for title_b, sequence_b in sequence_dictionary.items():
         sequence_a = sequence_dictionary[sequence_id]
         alignment = pairwise2.align.globalds(sequence_a, sequence_b, subsmatrix,
         -10, -0.5, penalize_end_gaps=False, one_alignment_only=True)[0]
-        if local == False:
-            identity = calculate_global_identity(alignment)
+        if (sequence_id,title_b) in identity_dictionary or (title_b,sequence_id) in identity_dictionary:
+            continue
         else:
-            identity = calculate_local_identity(alignment)
-        with open(output, 'a') as outfile:
-            outfile.write("{}\t{}\t{}\n".format(sequence_id,title_b,identity))
-    
+            if local == False:
+                identity = calculate_global_identity(alignment)
+            else:
+                identity = calculate_local_identity(alignment)
+    with open(output, 'a') as outfile:
+        for pair, identity in identity_dictionary.items():
+            outfile.write("{}\t{}\t{}\n".format(pair[0], pair[1], identity))
     
 def calculate_global_identity(alignment):
     aln_len = alignment[4]
@@ -135,7 +139,6 @@ def main():
 
     subsmatrix = get_substitution_matrix()
     sequences = get_sequences(fasta_file)
-    sequence_ids = sequences.keys()
     query_list = get_queries(query)
     try:
         pool = multiprocessing.Pool(threads, initializer = child_initialize, 
