@@ -31,10 +31,9 @@ from pathlib import Path
 ################################################################################
 
 """---2.0 Define Functions---"""
-def child_initialize(_dictionary, _output, _subsmatrix, _local):
-     global sequence_dictionary, output, subsmatrix, local
+def child_initialize(_dictionary, _subsmatrix, _local):
+     global sequence_dictionary, subsmatrix, local
      sequence_dictionary = _dictionary
-     output = _output
      subsmatrix = _subsmatrix
      local = _local
 
@@ -74,8 +73,10 @@ def perform_global_alignment(sequence_id):
         else:
             if local == False:
                 identity = calculate_global_identity(alignment)
+                identity_dictionary[(sequence_id,title_b)] = identity
             else:
                 identity = calculate_local_identity(alignment)
+                identity_dictionary[(sequence_id,title_b)] = identity
     outfile = sequence_id + '.id.txt'
     with open(outfile, 'w') as output:
         for pair, identity in identity_dictionary.items():
@@ -128,14 +129,14 @@ def main():
                         '''Optional Database Parameters: See ''' + sys.argv[0] + ' -h')
     parser.add_argument('-f', '--fasta', dest='fasta_file', action='store', required=True, help='Fasta file with all sequences to align (references).')
     parser.add_argument('-q', '--query', dest='query', action='store', required=True, help='File with list of ids to use as queries vs all refs.')
-    parser.add_argument('-o', '--output_file', dest='output_file', action='store', required=True, help='Tabular file to save identities.')
+    # parser.add_argument('-o', '--output_file', dest='output_file', action='store', required=True, help='Tabular file to save identities.')
     parser.add_argument('-t', '--threads', dest='threads', action='store', type=int, required=False, default=1, help='Threads to use. By default 1')
     parser.add_argument('--local', dest='local', action='store_true', required=False, help='Calculate local identities. By default calculates global.')
     args = parser.parse_args()
 
     fasta_file = args.fasta_file
     query = args.query
-    output_file = args.output_file
+    # output_file = args.output_file
     local = args.local
     threads = args.threads
 
@@ -144,7 +145,7 @@ def main():
     query_list = get_queries(query)
     try:
         pool = multiprocessing.Pool(threads, initializer = child_initialize, 
-        initargs = (sequences, output_file, subsmatrix, local))
+        initargs = (sequences, subsmatrix, local))
         pool.map(perform_global_alignment, query_list)
     finally:
         pool.close()
