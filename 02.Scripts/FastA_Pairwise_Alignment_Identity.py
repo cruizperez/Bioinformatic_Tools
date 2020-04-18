@@ -76,9 +76,10 @@ def perform_global_alignment(sequence_id):
                 identity = calculate_global_identity(alignment)
             else:
                 identity = calculate_local_identity(alignment)
-    with open(output, 'a') as outfile:
+    outfile = sequence_id + '.id.txt'
+    with open(outfile, 'w') as output:
         for pair, identity in identity_dictionary.items():
-            outfile.write("{}\t{}\t{}\n".format(pair[0], pair[1], identity))
+            output.write("{}\t{}\t{}\n".format(pair[0], pair[1], identity))
     print("Finished {}.".format(sequence_id))
     
 def calculate_global_identity(alignment):
