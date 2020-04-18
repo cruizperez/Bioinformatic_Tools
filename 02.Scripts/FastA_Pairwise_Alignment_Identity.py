@@ -79,6 +79,7 @@ def perform_global_alignment(sequence_id):
     with open(output, 'a') as outfile:
         for pair, identity in identity_dictionary.items():
             outfile.write("{}\t{}\t{}\n".format(pair[0], pair[1], identity))
+    print("Finished {}.".format(sequence_id))
     
 def calculate_global_identity(alignment):
     aln_len = alignment[4]
