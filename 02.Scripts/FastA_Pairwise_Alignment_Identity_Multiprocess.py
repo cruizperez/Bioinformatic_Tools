@@ -31,11 +31,12 @@ from pathlib import Path
 ################################################################################
 
 """---2.0 Define Functions---"""
-def child_initialize(_dictionary, _subsmatrix, _local):
-     global sequence_dictionary, subsmatrix, local
+def child_initialize(_dictionary, _query, _subsmatrix, _local):
+     global sequence_dictionary, subsmatrix, local, query
      sequence_dictionary = _dictionary
      subsmatrix = _subsmatrix
      local = _local
+     query = _query
 
 def get_sequences(fasta_file):
     from Bio.SeqIO.FastaIO import SimpleFastaParser
@@ -44,13 +45,6 @@ def get_sequences(fasta_file):
         for title, sequence in SimpleFastaParser(Fasta):
             dictionary[title] = sequence
     return dictionary
-
-def get_queries(query_file):
-    query_list = []
-    with open(query_file, 'r') as queries:
-        for line in queries:
-            query_list.append(line.strip())
-    return query_list
 
 def get_substitution_matrix():
     script_path = Path(__file__)
@@ -62,27 +56,19 @@ def get_substitution_matrix():
     return dnafull
 
 
-def perform_global_alignment(sequence_id):
-    identity_dictionary = {}
-    for title_b, sequence_b in sequence_dictionary.items():
-        sequence_a = sequence_dictionary[sequence_id]
-        alignment = pairwise2.align.globalds(sequence_a, sequence_b, subsmatrix,
-        -10, -0.5, penalize_end_gaps=False, one_alignment_only=True)[0]
-        if (sequence_id,title_b) in identity_dictionary or (title_b,sequence_id) in identity_dictionary:
-            continue
-        else:
-            if local == False:
-                identity = calculate_global_identity(alignment)
-                identity_dictionary[(sequence_id,title_b)] = identity
-            else:
-                identity = calculate_local_identity(alignment)
-                identity_dictionary[(sequence_id,title_b)] = identity
-    outfile = sequence_id + '.id.txt'
-    with open(outfile, 'w') as output:
-        for pair, identity in identity_dictionary.items():
-            output.write("{}\t{}\t{}\n".format(pair[0], pair[1], identity))
-    print("Finished {}.".format(sequence_id))
-    
+def perform_global_alignment(target_id):
+    print("starting {} vs {}".format(query, target_id))
+    query_seq = sequence_dictionary[query]
+    target_seq = sequence_dictionary[target_id]
+    alignment = pairwise2.align.globalds(query_seq, target_seq, subsmatrix,
+    -10, -0.5, penalize_end_gaps=False, one_alignment_only=True)[0]
+    if local == False:
+        identity = calculate_global_identity(alignment)
+        return [(query_seq, target_seq), identity]
+    else:
+        identity = calculate_local_identity(alignment)
+        return [(query_seq, target_seq), identity]
+
 def calculate_global_identity(alignment):
     aln_len = alignment[4]
     ident_bases = 0
@@ -140,14 +126,22 @@ def main():
 
     subsmatrix = get_substitution_matrix()
     sequences = get_sequences(fasta_file)
-    query_list = get_queries(query)
+    sequences_ids = sequences.keys()
+
     try:
         pool = multiprocessing.Pool(threads, initializer = child_initialize, 
-        initargs = (sequences, subsmatrix, local))
-        pool.map(perform_global_alignment, query_list)
+        initargs = (sequences, query, subsmatrix, local))
+        alignment_results = pool.map(perform_global_alignment, sequences_ids)
     finally:
         pool.close()
         pool.join()
+
+    print("saving results")
+    outfile = query + '.id.txt'
+    with open(outfile, 'w') as output:
+        for pair_identity in alignment_results:
+            output.write("{}\t{}\t{}\n".format(pair_identity[0][0], pair_identity[0][1], pair_identity[1]))
+
 
 if __name__ == "__main__":
     main()
