@@ -64,10 +64,10 @@ def perform_global_alignment(target_id):
     -10, -0.5, penalize_end_gaps=False, one_alignment_only=True)[0]
     if local == False:
         identity = calculate_global_identity(alignment)
-        return [(query_seq, target_seq), identity]
+        return [(query, target_id), identity]
     else:
         identity = calculate_local_identity(alignment)
-        return [(query_seq, target_seq), identity]
+        return [(query, target_id), identity]
 
 def calculate_global_identity(alignment):
     aln_len = alignment[4]
