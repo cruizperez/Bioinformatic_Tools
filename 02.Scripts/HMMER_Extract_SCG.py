@@ -18,7 +18,7 @@
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 import multiprocessing
 from functools import partial
-from pathlib impor Path
+from pathlib import Path
 
 ################################################################################
 
