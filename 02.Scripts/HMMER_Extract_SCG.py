@@ -12,13 +12,13 @@
 # extracts the fasta sequences per single copy marker gene (SCG).
 ########################################################################
 """
-
 ################################################################################
 
 """---1.0 Import Modules---"""
 from Bio.SeqIO.FastaIO import SimpleFastaParser
 import multiprocessing
 from functools import partial
+from pathlib impor Path
 
 ################################################################################
 
@@ -43,6 +43,10 @@ def scg_extract_sequence(scg_group, information):
     proteins = scg_group[1]
     sequence_file = information[0]
     contig_separator = information[1]
+    output_dir = information[2]
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    outfile = str(output_dir / outfile)
     with open(sequence_file) as fasta_input, open(outfile, 'w') as fasta_output:
         for title, sequence in SimpleFastaParser(fasta_input):
             title = title.split()[0]
@@ -64,11 +68,13 @@ def main():
                         '''Global mandatory parameters: -i [HMMSearch Tab File] -f [Protein FastA]\n'''
                         '''Optional Database Parameters: See ''' + sys.argv[0] + ' -h')
     parser.add_argument("-i", "--input_hmmsearch", dest='hmmsearch', action='store', 
-                        required=True, help="Input hmmsearch tabular output")
+                        required=True, help="Input hmmsearch tabular search result.")
     parser.add_argument('-f', '--fasta_file', dest='fasta_file', action='store', 
-                        required=True, help='File to store filtered hmmsearch results')
+                        required=True, help='File to store filtered hmmsearch results.')
+    parser.add_argument('-o', '--output_dir', dest='output_dir', action='store', 
+                        required=True, help='Output directory to store the results.')
     parser.add_argument('-t', '--threads', dest='threads', action='store', type=int, 
-                        required=False, help='Threads to use. By default 1')
+                        required=False, help='Threads to use. By default 1.')
     parser.add_argument('--separator', dest='separator', action='store', default='--', nargs=argparse.REMAINDER,
                         required=False, help='Contig delimiter. By default "--", e.g. Genome1--contig1_gene1\nIf separator contains - or -- pass it as --separator="--"')
     args = parser.parse_args()
@@ -77,6 +83,7 @@ def main():
     fasta_file = args.fasta_file
     threads = args.threads
     separator = args.separator
+    output_dir = args.output_dir
 
     if isinstance(separator, list):
         separator = separator[0]
