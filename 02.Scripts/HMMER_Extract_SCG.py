@@ -97,7 +97,7 @@ def main():
 
     try:
         pool = multiprocessing.Pool(threads)
-        pool.map(partial(scg_extract_sequence, information=(fasta_file, separator)), scg_list)
+        pool.map(partial(scg_extract_sequence, information=(fasta_file, separator, output_dir)), scg_list)
     finally:
         pool.close()
         pool.join()
