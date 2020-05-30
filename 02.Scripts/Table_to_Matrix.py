@@ -28,12 +28,14 @@ def table_converter(table_file, outfile, first_column, second_column, value_col)
             row_ids.append(line[first_column-1])
             col_ids.append(line[second_column-1])
 
+    row_ids = sorted(list(set(row_ids)))
+    col_ids = sorted(list(set(col_ids)))
     final_matrix = pd.DataFrame(index=row_ids, columns=col_ids)
 
     with open(table_file, 'r') as input_file:
         for line in input_file:
             line = line.strip().split()
-            final_matrix.loc[first_column-1, second_column-1] = value_col-1
+            final_matrix.loc[line[first_column-1], line[second_column-1]] = line[value_col-1]
 
     final_matrix.to_csv(outfile, sep="\t", header=True, index=True)
 
