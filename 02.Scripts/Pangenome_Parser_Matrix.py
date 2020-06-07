@@ -107,8 +107,10 @@ def Pangenome(Matrix, Core = 80, Flexible = 50, Permutations = 100, Plot=False):
 def Pangenome_Plot(Pangenome_Table, Output_Files_Prefix, Core=80, Flexible=50):
     # Import required modules
     import matplotlib.pyplot as plt
+    import matplotlib
     import lmfit
     from lmfit.models import ExponentialModel, PowerLawModel, ExpressionModel
+    matplotlib.rcParams['pdf.fonttype'] = 42
 
     # Model the Pangenome using a Powerlaw function  Ps = κn^γ
     print('\nModelling the Pangenome using a PowerLaw function K*N^\u03B3')
@@ -165,11 +167,11 @@ def Pangenome_Plot(Pangenome_Table, Output_Files_Prefix, Core=80, Flexible=50):
         Flexible_Genome[2].append(np.std(Temp_Table.iloc[:,2]))
 
 
-    Figure, Axis = plt.subplots(1,1, figsize=(15,7), constrained_layout=True, dpi=300)
+    Figure, Axis = plt.subplots(1,1, figsize=(10,6), constrained_layout=True, dpi=300)
     # Plot scatters
     Axis.scatter(Pangenome_Table['Num_Genomes'], Pangenome_Table['Num_OCs_Pangenome'], color="#393373", alpha = 0.2, label="Pangenome", s=70)
-    Axis.scatter(Pangenome_Table['Num_Genomes'], Pangenome_Table.iloc[:,3], alpha = 0.2, color = '#A82324', label="Core Genome {}%".format(Core), s=70)
-    Axis.scatter(Pangenome_Table['Num_Genomes'], Pangenome_Table.iloc[:,2], alpha = 0.2, color = '#688170', label="Flexible Genome {}%".format(Flexible), s=70)
+    Axis.scatter(Pangenome_Table['Num_Genomes'], Pangenome_Table.iloc[:,3], alpha = 0.2, color = '#A82324', label="Core Genome {}% ({})".format(Core, round(Core_Genome_Fit.best_values['omega'], 2)), s=70)
+    Axis.scatter(Pangenome_Table['Num_Genomes'], Pangenome_Table.iloc[:,2], alpha = 0.2, color = '#688170', label="Flexible Genome {}% ({})".format(Flexible, round(Flexible_Genome_Fit.best_values['omega'], 2)), s=70)
     # Plot statistics
     # Axis.scatter(range(1,Num_Genomes), Pangenome[0], color="grey", s=40, marker="s", label="Mean")
     Axis.plot(range(1,Num_Genomes), np.asarray(Pangenome[0]) - np.asarray(Pangenome[2]), linewidth=1, color="black", ls=(0, (1, 1)), label="Standard Dev.")
@@ -184,16 +186,16 @@ def Pangenome_Plot(Pangenome_Table, Output_Files_Prefix, Core=80, Flexible=50):
     Axis.plot(Pangenome_Table['Num_Genomes'], PowerLaw_Fit.best_fit, '-', linewidth=2, label="\u03B3: {} ({} Pangenome)".format(round(Gamma,2),PanLabel), color="#BFAA2E")
     Axis.plot(Pangenome_Table['Num_Genomes'], Core_Genome_Fit.best_fit, '-', linewidth=2, color="#015C1B", label="Core genes - \u03A9: {}".format(round(Core_Genome_Fit.best_values['omega'])))
     Axis.plot(Pangenome_Table['Num_Genomes'], Flexible_Genome_Fit.best_fit, '-', linewidth=2, color="#824D55", label="Common genes - \u03A9: {}".format(round(Flexible_Genome_Fit.best_values['omega'])))
-    Legend = Axis.legend(fontsize=12)
+    Legend = Axis.legend(fontsize=12, loc="upper left")
     for text in Legend.get_texts():
-        text.set_color("grey")
+        text.set_color("#303030")
     Axis.tick_params(axis='both', which='major', labelsize=10)
     Axis.set_xlabel("Number of Genomes", fontsize=15)
     Axis.set_ylabel("Number of Gene Clusters", fontsize=15)
     Axis.set_xlim(0,Num_Genomes)
     Axis.set_ylim(min(Pangenome_Table.iloc[:,3])-500,max(Pangenome_Table.iloc[:,1])+500)
     Figure.suptitle("Core vs Pangenome Collector Curves", color="#802B18", fontsize=35)
-    Figure.savefig(Output_Files_Prefix + ".png")
+    Figure.savefig(Output_Files_Prefix + ".pdf")
 
 # ----------------------------------------------
 
@@ -204,12 +206,13 @@ def main():
     from sys import argv
     import argparse
     # Setup parser for arguments.
-    parser = argparse.ArgumentParser(description='''Parses a binary matrix representing the Pangenome
-                                                    of genomes with Orthologous Clusters (OCs) in the rows and genomes
-                                                    in columns. It produces a tab-delimited file with the Pan, Core and Flexible genomes and optionally a plot'''
-                                    'Global mandatory parameters: [Input Binary Matrix] [Output Prefix]\n'
-                                    'Optional Database Parameters: See ' + argv[0] + ' -h')
-    parser.add_argument("-i", "--inputFile", dest='Input_Matrix', required=True, help="Input FastA file")
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
+            description='''Parses a binary matrix representing the Pangenome\n'''
+                        '''of genomes with orthologous clusters (OCs) in the rows and genomes in columns.\n'''
+                        '''It produces a tab-delimited file with the Pan, Core and Flexible genomes and optionally a plot\n'''
+                        '''Global mandatory parameters: [Input Binary Matrix] [Output Prefix]\n'''
+                        'Optional Database Parameters: See ' + argv[0] + ' -h')
+    parser.add_argument("-i", "--inputFile", dest='Input_Matrix', required=True, help="Input tab-separated matrix (with headers in rows and columns)")
     parser.add_argument("-o", "--outputPrefix", dest='Output_Files_Prefix', required=False, default = 'Pangenome', help="Prefix for the output files.")
     parser.add_argument("--core", dest='Core', required=False, type = int, default = 80, help="Percentage of genomes with an OC to be considered core, by default 80")
     parser.add_argument("--flex", dest='Flexible', required=False, type = int, default = 50, help="Percentage of genomes with an OC to be considered part of the flexible genome, by default 50")
