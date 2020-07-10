@@ -18,11 +18,11 @@
 def MCL_to_List(MCL_Output, Output_Folder=None, Contig_Folder=None):
     """ Parses a MCL output and returns a dictionary with contigs that belong
         to each cluster and writes a FastA file with unclustered contigs. """
-    import pathlib as pl
+    from pathlib2 import Path
     from Bio.SeqIO.FastaIO import SimpleFastaParser
     # Folder
-    Contig_Folder = pl.Path(Contig_Folder)
-    Output_Folder = pl.Path(Output_Folder)
+    Contig_Folder = Path(Contig_Folder)
+    Output_Folder = Path(Output_Folder)
     Output_Folder.mkdir(exist_ok=True, parents=True)
     # Singletons
     Unclustered_Sequences = {}
@@ -42,19 +42,19 @@ def MCL_to_List(MCL_Output, Output_Folder=None, Contig_Folder=None):
             if len(line) > 1:
                 Out_Fasta = Output_Cluster.joinpath("Cluster_{}.genomes".format(Cluster))
                 Cluster_List.append(Out_Fasta) # Open Fasta Output
-                with Out_Fasta.open('w') as Outfile:
+                with Out_Fasta.open('w', encoding='utf-8') as Outfile:
                     for genome in line:
-                        genome = pl.Path(genome).name
+                        genome = Path(genome).name
                         Genome_file = Contig_Folder.joinpath(genome) # Input fasta folder
                         with Genome_file.open('r') as Outfasta:
                             for title, seq in SimpleFastaParser(Outfasta):
                                 Outfile.write(">{}\n{}\n".format(title,seq))
                     Cluster += 1
             else:
-                Unclust = Unclustered_Fasta.open('a')
+                Unclust = Unclustered_Fasta.open('a', encoding='utf-8')
                 for genome in line:
                     Unclustered_Contigs += 1
-                    genome = pl.Path(genome).name
+                    genome = Path(genome).name
                     Genome_file = Contig_Folder.joinpath(genome) # Input fasta folder
                     with Genome_file.open('r') as Infasta:
                         for title, seq in SimpleFastaParser(Infasta):
@@ -69,7 +69,6 @@ def MCL_to_List(MCL_Output, Output_Folder=None, Contig_Folder=None):
     # ------------------------
 
 def Minimus2(Cluster_list):
-    import pathlib as pl
     import subprocess
 
     for Cluster in Cluster_list:
@@ -83,8 +82,8 @@ def Minimus2(Cluster_list):
         try:
             Minimus = subprocess.check_call(["minimus2", Prefix, "-D", "OVERLAP=2000", "-D", "MINID=95"])
         except:
-            print("------ WARNING -------")
-            print(Minimus)
+            print "------ WARNING -------"
+            print Minimus
         if Minimus == 0:
            Done = Cluster.with_suffix(".out")
            Done.touch(exist_ok=True)
@@ -103,8 +102,8 @@ def main():
             '''Global mandatory parameters: -m [MCL Output] -p [Output Prefix]\n'''
             '''Optional Database Parameters: See ''' + argv[0] + ' -h')
     parser.add_argument('-m', '--mclFile', dest='MCL_File', action='store', required=True, help='Input MCL file.')
-    parser.add_argument('-o', '--outfolder', dest='Output_Folder', action='store', required=True, help='Prefix of output files.')
-    parser.add_argument('-c', '--contigfolder', dest='Contig_Folder', action='store', required=True, help='Prefix of output files.')
+    parser.add_argument('-o', '--outfolder', dest='Output_Folder', action='store', required=True, help='Folder to store output.')
+    parser.add_argument('-c', '--contigfolder', dest='Contig_Folder', action='store', required=True, help='Folder where individual contigs are located.')
     parser.add_argument('--step', dest="Step", action='store', required=False, default=1, type=int, 
                         help='Step to perform; 1 start from scratch, 2 start from minimus2.')
     args = parser.parse_args()
@@ -118,8 +117,8 @@ def main():
         Cluster_List = MCL_to_List(MCL_File, Output_Folder, Contig_Folder)
         Minimus2(Cluster_List)
     else:
-        import pathlib as pl
-        Output_Folder = pl.Path(Output_Folder)
+        from pathlib2 import Path
+        Output_Folder = Path(Output_Folder)
         Folders = [f for f in Output_Folder.iterdir() if f.is_dir()]
         Files = [f.joinpath(f.name + '.genomes') for f in Folders]
         Minimus2(Files)
