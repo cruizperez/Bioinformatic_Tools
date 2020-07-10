@@ -48,7 +48,7 @@ def MCL_to_List(MCL_Output, Output_Folder=None, Contig_Folder=None):
                         Genome_file = Contig_Folder.joinpath(genome) # Input fasta folder
                         with Genome_file.open('r') as Outfasta:
                             for title, seq in SimpleFastaParser(Outfasta):
-                                Outfile.write(">{}\n{}\n".format(unicode(title),unicode(seq)))
+                                Outfile.write(unicode(">{}\n{}\n".format(title,seq)))
                     Cluster += 1
             else:
                 Unclust = Unclustered_Fasta.open('a', encoding='utf-8')
@@ -58,7 +58,7 @@ def MCL_to_List(MCL_Output, Output_Folder=None, Contig_Folder=None):
                     Genome_file = Contig_Folder.joinpath(genome) # Input fasta folder
                     with Genome_file.open('r') as Infasta:
                         for title, seq in SimpleFastaParser(Infasta):
-                            Unclust.write(">{}\n{}\n".format(unicode(title),unicode(seq)))
+                            Unclust.write(unicode(">{}\n{}\n".format(title,seq)))
                 Unclust.close()
 
     print("There were {} clusters".format(Cluster))
