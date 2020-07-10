@@ -77,10 +77,10 @@ def Minimus2(Cluster_list):
             continue
         toAmos_File = Cluster.with_suffix('.afg') # Output for script toAmos
         Prefix = Cluster.with_suffix('') # Input prefix for Minimus2
-        toAmos = subprocess.Popen(["toAmos", "-s", Cluster, "-o", toAmos_File], stdout=subprocess.PIPE)
+        toAmos = subprocess.Popen(["toAmos", "-s", str(Cluster), "-o", str(toAmos_File)], stdout=subprocess.PIPE)
         toAmos.wait()
         try:
-            Minimus = subprocess.check_call(["minimus2", Prefix, "-D", "OVERLAP=2000", "-D", "MINID=95"])
+            Minimus = subprocess.check_call(["minimus2", str(Prefix), "-D", "OVERLAP=2000", "-D", "MINID=95"])
         except:
             print "------ WARNING -------"
             print Minimus
