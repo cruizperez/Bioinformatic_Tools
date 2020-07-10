@@ -79,6 +79,7 @@ def Minimus2(Cluster_list):
         Prefix = Cluster.with_suffix('') # Input prefix for Minimus2
         toAmos = subprocess.Popen(["toAmos", "-s", str(Cluster), "-o", str(toAmos_File)], stdout=subprocess.PIPE)
         toAmos.wait()
+        Minimus = None
         try:
             Minimus = subprocess.check_call(["minimus2", str(Prefix), "-D", "OVERLAP=2000", "-D", "MINID=95"])
         except:
