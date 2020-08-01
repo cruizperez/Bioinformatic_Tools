@@ -31,25 +31,26 @@ def MagicBlast_filter_slow(input_tab, outfile, aln_fraction = 80, percent_id = 1
     magicblast_hits = {}
     with open(input_tab) as tabular:
         for line in tabular:
-            line = line.strip()
-            hit = line.split("\t")
             if line.startswith('#'):
                 continue
-            elif float(hit[2]) < percent_id:
-                continue
-            elif (float(hit[7]) - float(hit[6]) * 100 / float(hit[15])) < aln_fraction:
-                continue
             else:
-                score = float(hit[12])
-                if hit[0] not in magicblast_hits:
-                    magicblast_hits[hit[0]] = [score, [line]]
+                line = line.strip()
+                hit = line.split()
+                if float(hit[2]) < percent_id:
+                    continue
+                elif (float(hit[7]) - float(hit[6]) * 100 / float(hit[15])) < aln_fraction:
+                    continue
                 else:
-                    if score < magicblast_hits[hit[0]][0]:
-                        continue
-                    elif score > magicblast_hits[hit[0]][0]:
+                    score = float(hit[12])
+                    if hit[0] not in magicblast_hits:
                         magicblast_hits[hit[0]] = [score, [line]]
                     else:
-                        magicblast_hits[hit[0]][1].append(line)
+                        if score < magicblast_hits[hit[0]][0]:
+                            continue
+                        elif score > magicblast_hits[hit[0]][0]:
+                            magicblast_hits[hit[0]] = [score, [line]]
+                        else:
+                            magicblast_hits[hit[0]][1].append(line)
     with open(outfile, 'w') as output:
         for hit_values in magicblast_hits.values():
             output.write("{}\n".format(choice(hit_values[1])))
@@ -60,20 +61,21 @@ def MagicBlast_filter_fast(input_tab, outfile, aln_fraction = 80, percent_id = 1
     magicblast_hits = []
     with open(input_tab, 'r') as tabular, open(outfile, 'w') as output:
         for line in tabular:
-            line = line.strip()
-            hit = line.split("\t")
-            if hit[0] == '#':
-                continue
-            elif float(hit[2]) < percent_id:
-                continue
-            elif (float(hit[7]) - float(hit[6]) * 100 / float(hit[15])) < aln_fraction:
+            if line.startswith("#"):
                 continue
             else:
-                if hit[0] not in magicblast_hits:
-                    output.write("{}\n".format(line))
-                    magicblast_hits.append(hit[0])
-                else:
+                line = line.strip()
+                hit = line.split()
+                if float(hit[2]) < percent_id:
                     continue
+                elif (float(hit[7]) - float(hit[6]) * 100 / float(hit[15])) < aln_fraction:
+                    continue
+                else:
+                    if hit[0] not in magicblast_hits:
+                        output.write("{}\n".format(line))
+                        magicblast_hits.append(hit[0])
+                    else:
+                        continue
     print("Done! Check your output {}".format(outfile))
 
 ################################################################################
