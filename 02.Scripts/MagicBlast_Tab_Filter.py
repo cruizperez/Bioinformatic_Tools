@@ -111,7 +111,7 @@ def main():
     rapid_filter = args.rapid_filter
 
     if rapid_filter == True:
-        MagicBlast_filter_rapid(input_tab, outfile, aln_fraction, percent_id)
+        MagicBlast_filter_fast(input_tab, outfile, aln_fraction, percent_id)
     else:
         MagicBlast_filter_slow(input_tab, outfile, aln_fraction, percent_id)
 
