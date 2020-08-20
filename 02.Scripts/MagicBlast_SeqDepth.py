@@ -85,7 +85,7 @@ def calculate_seq_depth_sorted(magicblast_file, genome_sizes, output_table):
     current_bases = None
 
     with open(output_table, 'w') as output, open(magicblast_file, 'r') as magicblast:
-        output.write("Sequence\tPosition\tDepth")
+        output.write("Sequence\tPosition\tDepth\n")
         for line in magicblast:
             if line.startswith("#"):
                 continue
