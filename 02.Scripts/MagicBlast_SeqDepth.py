@@ -107,7 +107,7 @@ def calculate_seq_depth_sorted(magicblast_file, genome_sizes, output_table):
                     current_bases = np.zeros(genome_sizes[sequence])
                     current_bases[seq_start-1:seq_end-1] += 1
 
-
+#TODO: Fix this table saving to avoid creating two huge data structures (save line by line).
 def save_sequencing_depth_table(genome_seq_depth, output_table):
     """
     Saves a dictionary of arrays as a table with
