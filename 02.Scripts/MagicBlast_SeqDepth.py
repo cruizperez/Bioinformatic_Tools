@@ -102,7 +102,7 @@ def calculate_seq_depth_sorted(magicblast_file, genome_sizes, output_table):
                     current_bases[seq_start-1:seq_end-1] += 1
                 elif current_contig != sequence:
                     for base, coverage in np.ndenumerate(current_bases):
-                        output.write("{}\t{}\t{}\n".format(current_contig, str(base+1), str(coverage)))
+                        output.write("{}\t{}\t{}\n".format(current_contig, str(base[0]+1), str(coverage)))
                     current_contig = sequence
                     current_bases = np.zeros(genome_sizes[sequence])
                     current_bases[seq_start-1:seq_end-1] += 1
