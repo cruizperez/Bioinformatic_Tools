@@ -17,14 +17,15 @@ from Bio import Entrez
 
 ################################################################################
 """---2.0 Define Functions---"""
-def Post_IDs(List, Database, email, API= None):
+def Post_IDs(id_list, Database, email, api_key=None):
     if Database == "biosample":
         import re
-        for index, item in enumerate(List):
-            List[index] = re.sub('[A-Z]+', '', item)
-    Entrez.api_key = API
+        for index, item in enumerate(id_list):
+            id_list[index] = re.sub('[A-Z]+', '', item)
+    Entrez.api_key = api_key
     Entrez.email = email
-    search_results = Entrez.read(Entrez.epost(Database, id=",".join(List)))
+    search_results = Entrez.read(Entrez.epost(Database, id=",".join(id_list)))
+    print(search_results)
     webenv = search_results["WebEnv"]
     query_key = search_results["QueryKey"]
     History = (webenv, query_key)
@@ -108,7 +109,9 @@ def main():
     parser.add_argument('-d', '--dbfrom', dest='DB_From', action='store', required=False, default="nuccore", help='Database to look from, by default "nuccore"')
     parser.add_argument('-t', '--targetdb', dest='DB_Target', action='store', required=False, default="taxonomy", help='Database to look from, by default "nuccore"')
     parser.add_argument('--item', dest='Item', action='store', required=False, default="id", help='Item to recover, e.g., id (default) or lineage.')
-    parser.add_argument('-l', '--list', dest='ID_List', action='store', required=False, help='Comma-separated list IDs, e.g., ID1,ID2,ID3...')
+    parser.add_argument('-id_list', '--id_list', dest='id_list',
+        action='store', required=False, nargs="+",
+        help='Comma-separated list of IDs, e.g., ID1,ID2,ID3...')
     parser.add_argument('-f', '--fileID', dest='ID_File', action='store', required=False, help='File with IDs to search, one per line')
     parser.add_argument('-o', '--output', dest='Output_Table', action='store', required=True, help='Table to which the taxonomy and lineages will be printed.')
     parser.add_argument('-e', '--email', dest='Email', action='store', required=True, help='Email to tell NCBI who you are.')
@@ -119,7 +122,7 @@ def main():
     DB_From = args.DB_From.lower()
     DB_Target = args.DB_Target.lower()
     Item = args.Item.lower()
-    ID_List = args.ID_List
+    id_list = args.id_list
     ID_File = args.ID_File
     Output_Table = args.Output_Table
     Email = args.Email.lower()
@@ -127,15 +130,16 @@ def main():
     Header = args.Header
 
     Input_ID_List = []
-    if ID_File == None and ID_List == None:
+    if ID_File == None and id_list == None:
         print("No IDs provided. Please give a list of IDs with -l or a file containing the IDs one per line with -f.")
     elif ID_File != None:
         with open(ID_File) as Input_File:
             for line in Input_File:
                 line = line.strip().split()[0]
                 Input_ID_List.append(line)
-    elif ID_List != None:
-        Input_ID_List = ID_List.split(",")
+    elif id_list != None:
+        Input_ID_List = id_list
+    print(Input_ID_List)
     print("Performing the search of {} records in {} database and returning {} from {} database".format(len(Input_ID_List),
     DB_From, Item, DB_Target))
 
